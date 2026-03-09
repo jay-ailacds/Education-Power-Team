@@ -45,10 +45,11 @@ export function Scene1() {
       )}
 
       {/* Main Text */}
-      <div className="z-10 text-center px-10 max-w-5xl">
+      <div className="z-10 text-center px-[5vw] max-w-[90vw]">
         {step > 1 && (
           <motion.h1 
-            className="text-6xl md:text-7xl font-display font-bold text-text-inverse leading-tight"
+            className="font-display font-bold text-text-inverse leading-tight"
+            style={{ fontSize: 'clamp(2rem, 8vw, 7rem)' }}
             initial={{ opacity: 0, y: 30, filter: 'blur(10px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.8, ease: "circOut" }}

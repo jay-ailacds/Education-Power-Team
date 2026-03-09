@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { sceneTransitions } from '@/lib/video';
-import schoolKids from '@assets/school_kids_1773047158872.webp';
+import classroomImage from '@assets/smart_classroom_modern.png';
 
 export function Scene2() {
   const [step, setStep] = useState(0);
@@ -55,14 +55,16 @@ export function Scene2() {
             className="flex flex-col gap-6"
           >
             <motion.h2 
-              className="text-6xl font-display font-bold text-primary"
+              className="font-display font-bold text-primary"
+              style={{ fontSize: 'clamp(2rem, 6vw, 4rem)' }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: step > 0 ? 1 : 0, y: step > 0 ? 0 : 20 }}
             >
               Building a Vision
             </motion.h2>
             <motion.p 
-              className="text-3xl text-text-secondary leading-relaxed max-w-xl"
+              className="text-text-secondary leading-relaxed max-w-xl"
+              style={{ fontSize: 'clamp(1rem, 2.5vw, 2rem)' }}
               initial={{ opacity: 0 }}
               animate={{ opacity: step > 1 ? 1 : 0 }}
             >
@@ -95,11 +97,11 @@ export function Scene2() {
               transition={{ duration: 1, ease: "circOut" }}
             >
               <img 
-                src={schoolKids} 
-                alt="Students" 
+                src={classroomImage} 
+                alt="Modern Classroom" 
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-primary/20 mix-blend-overlay" />
+              <div className="absolute inset-0 bg-primary/10 mix-blend-overlay" />
             </motion.div>
           )}
         </div>

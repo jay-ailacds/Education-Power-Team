@@ -33,7 +33,8 @@ export function Scene4() {
         </motion.div>
         
         <motion.h2 
-          className="text-4xl md:text-5xl font-display font-medium text-text-inverse/80 mb-2"
+          className="font-display font-medium text-text-inverse/80 mb-2"
+          style={{ fontSize: 'clamp(1.5rem, 4vw, 3rem)' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
@@ -42,7 +43,8 @@ export function Scene4() {
         </motion.h2>
 
         <motion.h1 
-          className="text-7xl md:text-8xl font-display font-bold text-text-inverse tracking-tight"
+          className="font-display font-bold text-text-inverse tracking-tight"
+          style={{ fontSize: 'clamp(3rem, 10vw, 6rem)' }}
           initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ delay: 0.8, duration: 0.8 }}
@@ -51,12 +53,12 @@ export function Scene4() {
         </motion.h1>
 
         <motion.div 
-          className="mt-8 px-8 py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20"
+          className="mt-8 px-[5vw] py-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20 max-w-[90vw]"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1.2, type: "spring" }}
         >
-          <p className="text-2xl text-text-inverse font-medium">
+          <p className="text-text-inverse font-medium" style={{ fontSize: 'clamp(0.875rem, 2vw, 1.5rem)' }}>
             Complete 360° Solution for Educational Institutes
           </p>
         </motion.div>

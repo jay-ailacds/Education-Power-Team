@@ -19,7 +19,7 @@ export function Scene5() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveIdx(prev => (prev < 3 ? prev + 1 : prev));
+      setActiveIdx(prev => (prev < 3 ? prev + 1 : 0));
     }, 4000); // Wait 4s per service
 
     return () => clearInterval(interval);
@@ -33,7 +33,8 @@ export function Scene5() {
       <div className="absolute inset-0 bg-grid-pattern opacity-20" />
 
       <motion.h2 
-        className="absolute top-16 text-5xl font-display font-bold text-primary z-20"
+        className="absolute top-16 font-display font-bold text-primary z-20"
+        style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
       >
@@ -64,7 +65,8 @@ export function Scene5() {
                     className="h-2 bg-accent mb-4"
                   />
                   <motion.h3 
-                    className="text-6xl font-display font-bold drop-shadow-lg"
+                    className="font-display font-bold drop-shadow-lg"
+                    style={{ fontSize: 'clamp(1.5rem, 5vw, 3.5rem)' }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
@@ -72,7 +74,8 @@ export function Scene5() {
                     {svc.name}
                   </motion.h3>
                   <motion.p 
-                    className="text-3xl text-white/90 mt-2 font-body"
+                    className="text-white/90 mt-2 font-body"
+                    style={{ fontSize: 'clamp(1rem, 2.5vw, 1.75rem)' }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 }}

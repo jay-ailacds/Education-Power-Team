@@ -34,9 +34,10 @@ export function Scene6() {
     >
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--color-primary)_0%,_var(--color-bg-dark)_70%)] opacity-30" />
       
-      <div className="w-full h-full flex flex-col items-center pt-20 pb-10 px-16 relative z-10">
+      <div className="w-full h-full flex flex-col items-center pt-20 pb-10 px-[5vw] relative z-10">
         <motion.h2 
-          className="text-5xl font-display font-bold text-center mb-16"
+          className="font-display font-bold text-center mb-16"
+          style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -56,7 +57,8 @@ export function Scene6() {
               >
                 <div className="w-1/2 pr-12">
                   <motion.h3 
-                    className="text-6xl font-display font-bold mb-6"
+                    className="font-display font-bold mb-6"
+                    style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)' }}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.3 }}
@@ -64,7 +66,8 @@ export function Scene6() {
                     {op.name}
                   </motion.h3>
                   <motion.p 
-                    className="text-4xl text-text-muted"
+                    className="text-text-muted"
+                    style={{ fontSize: 'clamp(1rem, 2.5vw, 1.75rem)' }}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.5 }}

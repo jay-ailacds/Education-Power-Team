@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { sceneTransitions, staggerConfigs, itemVariants, containerVariants } from '@/lib/video';
-import computerLabs from '@assets/computerlabs_1773047158875.jpg';
+import itLab from '@assets/it_lab_advanced.png';
 import sportsAcademy from '@assets/sports_academy_1773047158873.jpeg';
 
 export function Scene3() {
@@ -32,9 +32,10 @@ export function Scene3() {
         style={{ backgroundSize: '200% 200%' }}
       />
 
-      <div className="z-10 w-full px-16 max-w-7xl">
+      <div className="z-10 w-full px-[5vw] max-w-[95vw]">
         <motion.h2 
-          className="text-5xl md:text-6xl font-display font-bold text-center mb-16"
+          className="font-display font-bold text-center mb-16"
+          style={{ fontSize: 'clamp(2rem, 6vw, 4rem)' }}
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -50,7 +51,7 @@ export function Scene3() {
             animate={{ opacity: step > 0 ? 1 : 0, x: step > 0 ? 0 : -50, scale: step > 0 ? 1 : 0.9 }}
             transition={{ type: "spring", stiffness: 100, damping: 20 }}
           >
-            <img src={computerLabs} className="w-full h-full object-cover" />
+            <img src={itLab} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-8">
               <h3 className="text-3xl font-bold">Advanced Technology</h3>
             </div>
