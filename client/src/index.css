@@ -1,18 +1,17 @@
 @import "tailwindcss";
 
-/* REPLACE THESE -- define your own palette and fonts for each video */
 :root {
-  --color-primary: #000000;
-  --color-secondary: #6B7280;
-  --color-accent: #3B82F6;
+  --color-primary: #1E3A8A;
+  --color-secondary: #3B82F6;
+  --color-accent: #F59E0B;
 
-  --color-bg-light: #FFFFFF;
+  --color-bg-light: #F8FAFC;
   --color-bg-dark: #0F172A;
-  --color-bg-muted: #F8FAFC;
+  --color-bg-muted: #E2E8F0;
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-muted: #9CA3AF;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748B;
   --color-text-inverse: #FFFFFF;
 
   --color-success: #10B981;
@@ -47,4 +46,36 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.text-stroke {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  color: transparent;
+}
+
+.text-stroke-accent {
+  -webkit-text-stroke: 2px var(--color-accent);
+  color: transparent;
+}
+
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
+}
+.bg-grid-pattern-dark {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
 }
