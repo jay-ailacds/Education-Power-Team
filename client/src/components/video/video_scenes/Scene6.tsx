@@ -5,10 +5,11 @@ import { sceneTransitions } from '@/lib/video';
 import tallyImage from '@assets/tally_1773047158873.jpg';
 import medicalImage from '@assets/skillbasedmedical_1773047158871.webp';
 import aiImage from '@assets/AI_1773047158871.webp';
+import rootSquareImage from '@assets/root_square_students.png';
 
 const operations = [
   { name: 'A.K. Solutions', desc: 'ERP & Automation', img: tallyImage, color: 'border-blue-500' },
-  { name: 'Root Square LLP', desc: 'Uniforms & Stationery', img: null, color: 'border-green-500' },
+  { name: 'Root Square LLP', desc: 'Uniforms & Stationery', img: rootSquareImage, color: 'border-green-500' },
   { name: 'AI-LAC-DS', desc: 'AI Learning Programs', img: aiImage, color: 'border-purple-500' },
   { name: 'Asperia Institute', desc: 'Medical Skill Training', img: medicalImage, color: 'border-red-500' },
 ];
@@ -82,17 +83,7 @@ export function Scene6() {
                     >
                       <img src={op.img} className="w-full h-full object-cover" />
                     </motion.div>
-                  ) : (
-                    <motion.div 
-                      className="w-full h-full rounded-2xl bg-gradient-to-br from-green-500/20 to-teal-500/20 border border-green-500/30 flex items-center justify-center"
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.4, type: "spring" }}
-                    >
-                      <div className="w-32 h-32 rounded-full border-4 border-dashed border-green-500/50 animate-spin-slow" />
-                      <div className="absolute inset-0 flex items-center justify-center text-8xl">📦</div>
-                    </motion.div>
-                  )}
+                  ) : null}
                 </div>
               </motion.div>
             )

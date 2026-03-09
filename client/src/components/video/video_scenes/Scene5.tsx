@@ -2,13 +2,13 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { sceneTransitions } from '@/lib/video';
 
-import labImage from '@assets/lab_1773047158875.jpeg';
+import vardhmanImage from '@assets/vardhman_classroom.png';
 import batteryImage from '@assets/Batteris_1773047158874.webp';
 import computerLabImage from '@assets/computerlabs_1773047158875.jpg';
 import sportsImage from '@assets/sports_academy_1773047158873.jpeg';
 
 const services = [
-  { name: 'Vardhman Traders', desc: 'Modern Infrastructure', image: labImage },
+  { name: 'Vardhman Traders', desc: 'Modern Classroom Infrastructure', image: vardhmanImage },
   { name: 'Mega Byte Systems', desc: 'Advanced IT Systems', image: computerLabImage },
   { name: 'Ace Power', desc: 'Reliable Power Backup', image: batteryImage },
   { name: 'Athletos Foundation', desc: 'Structured Sports', image: sportsImage },
