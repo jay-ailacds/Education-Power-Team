@@ -75,11 +75,12 @@ scenes:
       Every educational institute begins with a vision.
       But building a future-ready institute today requires
       much more than infrastructure.
-    image: "../../attached_assets/smart_classroom_modern.png"
+    image: "../../attached_assets/smart_classroom_safe.png"
     video_prompt: >
       Blueprint animation transforming into real buildings. Modern classrooms
-      appear with digital boards. Indian students enter campus gates, smiling.
-      Warm natural lighting, smooth camera pan.
+      appear with digital smartboards and bright interiors. Campus gates open
+      to reveal a beautiful walkway lined with trees. Warm natural lighting,
+      smooth cinematic camera pan across the institute.
     transition: wipe
 
   - id: scene3-modern
@@ -125,8 +126,9 @@ scenes:
         duration_hint_ms: 4500
         image: "../../attached_assets/computerlabs_1773047158875.jpg"
         video_prompt: >
-          Computer lab with rows of monitors, networking cables being connected,
-          Indian students using modern computers, digital smartboard display.
+          Modern computer lab with rows of monitors glowing, networking cables
+          being connected to server racks, digital smartboard displaying code.
+          Clean, professional IT infrastructure environment.
 
       - id: scene5c-acepower
         script: "Ace Power ensures reliable power backup for uninterrupted operations."
@@ -160,19 +162,21 @@ scenes:
       - id: scene6b-rootsquare
         script: "Root Square LLP manages uniforms and stationery supply systems."
         duration_hint_ms: 3500
-        image: "../../attached_assets/root_square_students.png"
+        image: "../../attached_assets/root_square_supplies.png"
         video_prompt: >
-          Indian school students in neat uniforms, stationery distribution
-          center, organized supply chain. Bright school environment.
+          Neatly arranged uniforms on display racks, organized stationery
+          warehouse with labeled shelves, supply chain logistics with boxes
+          being sorted. Bright, clean distribution center environment.
 
       - id: scene6c-ailacds
         script: "AI-LA-CDS empowers institutes with AI skills programs, AI summer camps, and AI-enabled learning platforms."
         duration_hint_ms: 3500
-        image: "../../attached_assets/AI_1773047158871.webp"
+        image: "../../attached_assets/ai_learning_platform.png"
         video_prompt: >
-          Indian students using laptops with AI interfaces, coding on screens,
-          summer camp setting with tech activities, modern learning platform
-          on large display.
+          Laptop screens showing AI interfaces and neural network visualizations,
+          lines of code scrolling on monitors, a large display showing a modern
+          AI-powered learning platform dashboard. Futuristic tech environment
+          with blue ambient lighting.
 
       - id: scene6d-asperia
         script: "Asperia Institute provides skill-based training programs for medical students across PAN India."

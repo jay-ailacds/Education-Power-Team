@@ -2,6 +2,55 @@ import { writeFileSync } from "node:fs";
 import { logger } from "../core/logger.ts";
 import type { KieTaskResponse, KieTaskStatus } from "../types.ts";
 
+interface SunoTrack {
+  id: string;
+  audioUrl: string;
+  streamAudioUrl?: string;
+  imageUrl?: string;
+  prompt?: string;
+  modelName?: string;
+  title: string;
+  tags?: string;
+  createTime?: string;
+  duration: number;
+}
+
+interface SunoTaskData {
+  taskId: string;
+  status: string;
+  response?: { taskId: string; sunoData: SunoTrack[] };
+  errorCode?: number;
+  errorMessage?: string;
+}
+
+export interface SunoMusicResult {
+  audioUrl: string;
+  title: string;
+  duration: number;
+}
+
+interface VeoTaskData {
+  taskId: string;
+  paramJson?: string;
+  completeTime?: number;
+  response?: {
+    taskId: string;
+    resultUrls: string[] | null;
+    originUrls: string[] | null;
+    resolution?: string;
+  };
+  successFlag: number; // 0=generating, 1=success, 2=failed, 3=generation failed
+  errorCode?: number | null;
+  errorMessage?: string | null;
+  createTime?: number;
+  fallbackFlag?: boolean;
+}
+
+export interface VeoVideoResult {
+  videoUrl: string;
+  resolution?: string;
+}
+
 const BASE_URL = "https://api.kie.ai/api/v1";
 
 export interface PollOptions {
@@ -101,6 +150,101 @@ export class KieClient {
       }
 
       // Still processing
+      delay = Math.min(delay * o.backoffMultiplier, o.maxDelayMs);
+    }
+  }
+
+  async pollMusicUntilDone(taskId: string, opts?: PollOptions): Promise<SunoMusicResult> {
+    const o = { ...DEFAULT_POLL, ...opts };
+    const startTime = Date.now();
+    let delay = o.initialDelayMs;
+
+    while (true) {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > o.timeoutMs) {
+        throw new Error(`Music task ${taskId} timed out after ${Math.round(o.timeoutMs / 1000)}s`);
+      }
+
+      await sleep(delay);
+
+      const url = `${BASE_URL}/generate/record-info?taskId=${encodeURIComponent(taskId)}`;
+      const res = await fetch(url, { headers: this.headers() });
+      const json = await res.json() as { code: number; msg: string; data: SunoTaskData | null };
+
+      if (json.code !== 200 || !json.data) {
+        logger.warn(`Music poll error for ${taskId}: [${json.code}] ${json.msg}`);
+        delay = Math.min(delay * o.backoffMultiplier, o.maxDelayMs);
+        continue;
+      }
+
+      const { status } = json.data;
+      logger.debug(`Music task ${taskId}: status=${status}`);
+
+      if (status === "SUCCESS") {
+        const tracks = json.data.response?.sunoData || [];
+        if (tracks.length === 0) {
+          throw new Error(`Music task ${taskId}: SUCCESS but no tracks returned`);
+        }
+        return {
+          audioUrl: tracks[0].audioUrl,
+          title: tracks[0].title,
+          duration: tracks[0].duration,
+        };
+      }
+      if (status === "CREATE_TASK_FAILED" || status === "GENERATE_AUDIO_FAILED" || status === "SENSITIVE_WORD_ERROR") {
+        throw new Error(
+          `Music task ${taskId} failed: ${json.data.errorMessage || status}`
+        );
+      }
+
+      // PENDING, TEXT_SUCCESS, FIRST_SUCCESS — still processing
+      delay = Math.min(delay * o.backoffMultiplier, o.maxDelayMs);
+    }
+  }
+
+  async pollVideoUntilDone(taskId: string, opts?: PollOptions): Promise<VeoVideoResult> {
+    const o = { ...DEFAULT_POLL, ...opts };
+    const startTime = Date.now();
+    let delay = o.initialDelayMs;
+
+    while (true) {
+      const elapsed = Date.now() - startTime;
+      if (elapsed > o.timeoutMs) {
+        throw new Error(`Video task ${taskId} timed out after ${Math.round(o.timeoutMs / 1000)}s`);
+      }
+
+      await sleep(delay);
+
+      const url = `${BASE_URL}/veo/record-info?taskId=${encodeURIComponent(taskId)}`;
+      const res = await fetch(url, { headers: this.headers() });
+      const json = await res.json() as { code: number; msg: string; data: VeoTaskData | null };
+
+      if (json.code !== 200 || !json.data) {
+        logger.warn(`Video poll error for ${taskId}: [${json.code}] ${json.msg}`);
+        delay = Math.min(delay * o.backoffMultiplier, o.maxDelayMs);
+        continue;
+      }
+
+      const { successFlag } = json.data;
+      logger.debug(`Video task ${taskId}: successFlag=${successFlag}`);
+
+      if (successFlag === 1) {
+        const resultUrls = json.data.response?.resultUrls || [];
+        if (resultUrls.length === 0) {
+          throw new Error(`Video task ${taskId}: SUCCESS but no resultUrls returned`);
+        }
+        return {
+          videoUrl: resultUrls[0],
+          resolution: json.data.response?.resolution,
+        };
+      }
+      if (successFlag === 2 || successFlag === 3) {
+        throw new Error(
+          `Video task ${taskId} failed (flag=${successFlag}): ${json.data.errorMessage || "unknown"}`
+        );
+      }
+
+      // successFlag === 0 — still generating
       delay = Math.min(delay * o.backoffMultiplier, o.maxDelayMs);
     }
   }

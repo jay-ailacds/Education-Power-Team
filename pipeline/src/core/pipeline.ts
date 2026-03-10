@@ -34,6 +34,17 @@ export async function runPipeline(
   const configContent = readFileSync(resolve(configPath), "utf-8");
   const outputDir = resolve(dirname(configPath), config.output.directory);
 
+  // Resolve relative image paths in scenes to absolute paths (relative to config file)
+  const configDir = dirname(resolve(configPath));
+  for (const scene of config.scenes) {
+    if (scene.image) scene.image = resolve(configDir, scene.image);
+    if (scene.segments) {
+      for (const seg of scene.segments) {
+        if (seg.image) seg.image = resolve(configDir, seg.image);
+      }
+    }
+  }
+
   logger.step("PIPELINE", `Project: ${config.project.name}`);
   logger.info(`  Slug: ${config.project.slug}`);
   logger.info(`  Scenes: ${config.scenes.length}`);

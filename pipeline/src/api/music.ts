@@ -39,37 +39,20 @@ export async function generateMusic(
     style: musicConfig.style || "Corporate Inspirational Upbeat",
     title: musicConfig.title || "Background Music",
     negativeTags: musicConfig.negative_tags || "Heavy Metal, Harsh, Aggressive",
+    callBackUrl: "https://example.com/noop",
   });
 
   logger.info(`  Music task created: ${taskId}`);
 
-  // Poll — music generation can take longer
-  const result = await client.pollUntilDone(taskId, {
+  // Poll using Suno-specific endpoint
+  const result = await client.pollMusicUntilDone(taskId, {
     timeoutMs: 15 * 60 * 1000,
     initialDelayMs: 5000,
   });
 
-  if (!result?.resultJson) {
-    throw new Error(`Music task ${taskId} completed but no resultJson`);
-  }
+  logger.info(`  Music ready: "${result.title}" (${Math.round(result.duration)}s)`);
 
-  const resultData = JSON.parse(result.resultJson);
-  // Suno returns an array of tracks
-  let audioUrl: string | null = null;
-
-  if (Array.isArray(resultData)) {
-    audioUrl = resultData[0]?.audio_url || resultData[0]?.url;
-  } else if (resultData.data && Array.isArray(resultData.data)) {
-    audioUrl = resultData.data[0]?.audio_url;
-  } else {
-    audioUrl = resultData.audio_url || resultData.resultUrls?.[0] || resultData.url;
-  }
-
-  if (!audioUrl) {
-    throw new Error(`Music task: could not find audio URL in: ${result.resultJson}`);
-  }
-
-  await client.downloadFile(audioUrl, outputFile);
+  await client.downloadFile(result.audioUrl, outputFile);
   const probe = await ffprobe(outputFile);
 
   logger.step("MUSIC", `Generated music: ${Math.round(probe.duration)}s`);
