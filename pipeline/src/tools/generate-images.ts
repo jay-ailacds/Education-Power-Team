@@ -22,19 +22,19 @@ const IMAGES_TO_GENERATE = [
     name: "smart_classroom_safe",
     prompt:
       "A modern smart classroom interior with digital smartboards, empty desks and chairs arranged neatly, bright natural lighting through large windows, potted plants, no people visible. Clean professional educational environment in India. Photorealistic, 4K quality.",
-    outputPath: resolve(import.meta.dirname, "../../../attached_assets/smart_classroom_safe.png"),
+    outputPath: resolve(import.meta.dirname, "../../../assets/smart_classroom_safe.png"),
   },
   {
     name: "root_square_supplies",
     prompt:
       "A bright organized supply distribution center with neat rows of school uniforms on display racks, stationery items on labeled shelves, cardboard boxes being sorted on conveyor belt. Professional warehouse lighting, no people visible. Clean logistics environment. Photorealistic, 4K quality.",
-    outputPath: resolve(import.meta.dirname, "../../../attached_assets/root_square_supplies.png"),
+    outputPath: resolve(import.meta.dirname, "../../../assets/root_square_supplies.png"),
   },
   {
     name: "ai_learning_platform",
     prompt:
       "A futuristic AI technology lab with multiple laptop screens showing neural network visualizations and code, a large wall-mounted display showing an AI learning platform dashboard, blue ambient LED lighting, modern furniture. No people visible. Clean tech environment. Photorealistic, 4K quality.",
-    outputPath: resolve(import.meta.dirname, "../../../attached_assets/ai_learning_platform.png"),
+    outputPath: resolve(import.meta.dirname, "../../../assets/ai_learning_platform.png"),
   },
 ];
 

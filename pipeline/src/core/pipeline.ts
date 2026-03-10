@@ -33,7 +33,7 @@ export async function runPipeline(
   // Load and validate config
   const config = loadConfig(configPath);
   const configContent = readFileSync(resolve(configPath), "utf-8");
-  const outputDir = resolve(dirname(configPath), config.output.directory);
+  const outputDir = resolve(dirname(configPath), config.output.directory, config.project.slug);
 
   // Resolve relative image paths in scenes to absolute paths (relative to config file)
   const configDir = dirname(resolve(configPath));
@@ -344,6 +344,7 @@ export async function runPipeline(
       const result = await composeVideo(
         videoFile,
         mixedAudioFile,
+        outputDir,
         config.output,
         config.project.slug
       );
@@ -400,7 +401,7 @@ function countScripts(config: ProjectConfig): number {
 export async function showStatus(configPath: string): Promise<void> {
   const config = loadConfig(configPath);
   const configContent = readFileSync(resolve(configPath), "utf-8");
-  const outputDir = resolve(dirname(configPath), config.output.directory);
+  const outputDir = resolve(dirname(configPath), config.output.directory, config.project.slug);
 
   const state = new PipelineStateManager(outputDir, configContent, config.project.slug);
   const all = state.getAll();

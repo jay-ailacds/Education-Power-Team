@@ -30,14 +30,16 @@ Education-Power-Team/
 │   ├── src/                  # TypeScript source (tsx runtime, no build step)
 │   ├── projects/             # YAML project configs
 │   └── CLAUDE.md             # Pipeline-specific guidance
-├── attached_assets/           # Source images shared by client and pipeline
-├── video/rendered/            # Pipeline output directory
-│   ├── .pipeline-state.json  # Step completion tracking
-│   ├── enhanced/             # Enhanced scripts + comparison
-│   ├── research/             # Exa.ai research results
-│   ├── tts/                  # Generated voiceover clips
-│   ├── music/                # Generated background music
-│   └── video/                # Video clips and final output
+├── assets/                    # Source images shared by client and pipeline
+├── output/                    # Pipeline outputs, scoped by project slug
+│   └── {project-slug}/       # Each project gets its own directory
+│       ├── .pipeline-state.json  # Step completion tracking
+│       ├── enhanced/             # Enhanced scripts + comparison
+│       ├── research/             # Exa.ai research results
+│       ├── audio/                # TTS clips, music, mixed audio
+│       ├── video/                # Video clips and combined output
+│       ├── slides/               # Generated slide images and clips
+│       └── {slug}.mp4           # Final output
 ├── .agents/
 │   ├── plans/                # Implementation plans
 │   └── guides/               # Setup guides
@@ -68,7 +70,7 @@ No test or lint commands are configured for either project.
 
 ## Architecture: How Client and Pipeline Relate
 
-The **client** is a browser-based preview/authoring tool. The **pipeline** is the production engine. They share `attached_assets/` images but no code.
+The **client** is a browser-based preview/authoring tool. The **pipeline** is the production engine. They share `assets/` images but no code.
 
 ```
                     ┌─────────────────────────────────┐
@@ -113,11 +115,12 @@ The pipeline supports 4 visual sources (configured in YAML `visual.source`):
 - **Per-segment granularity**: Both `video-gen.ts` and the planned `react-capture` flatten scenes with segments into individual clips (14 clips for the current project), enabling selective re-generation of any segment.
 - **Config-driven**: All project settings live in YAML files under `pipeline/projects/`. New video projects = new YAML config (see `.agents/guides/new-project-setup.md`).
 - **Idempotent pipeline**: Each step is tracked in `.pipeline-state.json`. Steps can be individually rerun with `--force` or the pipeline resumes automatically.
+- **Multi-project isolation**: Output is auto-scoped by `project.slug` — each project gets its own directory under `output/{slug}/`. Multiple projects can coexist without overwriting each other.
 
 ## Client Conventions
 
 - **Vite config** at repo root: `root: client/`, server on `0.0.0.0:5000`
-- **Path aliases**: `@/` → `client/src/`, `@assets/` → `attached_assets/`, `@shared/` → `shared/`
+- **Path aliases**: `@/` → `client/src/`, `@assets/` → `assets/`, `@shared/` → `shared/`
 - **Tailwind v4** with CSS-first config (no `tailwind.config.js`)
 - **Scene components** are self-contained — they receive NO props and manage their own animations, images, and timing internally
 - **Recording hooks**: `useVideoPlayer` calls `window.startRecording()` on mount and `window.stopRecording()` when the video ends. These are consumed by Playwright during react-capture.

@@ -6,7 +6,7 @@ const resolutionSchema = z.object({
 });
 
 const outputSchema = z.object({
-  directory: z.string().default("../video/rendered"),
+  directory: z.string().default("../../output"),
   resolution: resolutionSchema.default({ width: 1920, height: 1080 }),
   fps: z.number().min(24).max(60).default(30),
   codec: z.string().default("h264"),

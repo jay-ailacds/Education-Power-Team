@@ -13,10 +13,11 @@ export interface ComposedVideoResult {
 export async function composeVideo(
   videoFile: string,
   audioFile: string,
+  outputDir: string,
   outputConfig: OutputConfig,
   projectSlug: string
 ): Promise<ComposedVideoResult> {
-  const outDir = resolve(outputConfig.directory);
+  const outDir = outputDir;
   mkdirSync(outDir, { recursive: true });
 
   const outputFile = join(outDir, `${projectSlug}.mp4`);
