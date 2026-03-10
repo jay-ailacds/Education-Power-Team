@@ -147,9 +147,9 @@ scenes:
     transition: slideLeft
     segments:
       - id: scene5a-vardhman
-        script: "Vardhman Traders builds modern classroom and laboratory infrastructure."
+        script: "Vardhaman Traders builds modern classroom and laboratory infrastructure."
         duration_hint_ms: 4500
-        slide_title: "Vardhman Traders"
+        slide_title: "Vardhaman Traders"
         slide_stat: "95% agree facilities boost performance"
         slide_tagline: "Classroom & laboratory infrastructure"
         image: "../../assets/vardhman_classroom.png"
@@ -185,7 +185,7 @@ scenes:
         script: "Athletos Sports Foundation develops structured sports infrastructure and training."
         duration_hint_ms: 4500
         slide_title: "Athletos Sports Foundation"
-        slide_stat: "AI-enabled coaching"
+        slide_stat: "Grassroots to national level"
         slide_tagline: "Grassroots to national-level excellence"
         image: "../../assets/sports_academy_1773047158873.jpeg"
         video_prompt: >
@@ -221,9 +221,9 @@ scenes:
           being sorted. Bright, clean distribution center environment.
 
       - id: scene6c-ailacds
-        script: "AI-LA-CDS empowers institutes with AI skills programs, AI summer camps, and AI-enabled learning platforms."
+        script: "Aila-cee-dee-ess empowers institutes with AI skills programs, AI summer camps, and AI-enabled learning platforms."
         duration_hint_ms: 3500
-        slide_title: "AI-LA-CDS"
+        slide_title: "Aila CDS"
         slide_stat: "AI fluency is essential"
         slide_tagline: "AI skills programs & learning platforms"
         image: "../../assets/ai_learning_platform.png"

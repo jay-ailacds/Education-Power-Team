@@ -20,6 +20,13 @@ npx tsx src/cli.ts compose projects/education-power-team.yaml   # Final video co
 npx tsx src/cli.ts status projects/education-power-team.yaml    # Show pipeline state
 npx tsx src/cli.ts resume projects/education-power-team.yaml    # Resume from last step
 
+# Reset & regenerate commands
+npx tsx src/cli.ts reset projects/education-power-team.yaml tts       # Reset tts + all downstream
+npx tsx src/cli.ts reset projects/education-power-team.yaml slides    # Reset slides + compose
+npx tsx src/cli.ts reset projects/education-power-team.yaml --all     # Reset everything
+npx tsx src/cli.ts regen projects/education-power-team.yaml --scene scene5a-vardhman --step tts    # Regen one scene's voiceover
+npx tsx src/cli.ts regen projects/education-power-team.yaml --scene scene5a-vardhman --step video  # Regen one scene's video clip
+
 # Type checking (no compiled output — project uses tsx runtime)
 npx tsc --noEmit
 
@@ -42,11 +49,19 @@ research → enhance → tts → music → video → mix_audio → compose → v
 
 Each step is tracked in `.pipeline-state.json` (in the output directory). Steps can be individually rerun with `--force` or the pipeline resumes from the last completed step automatically.
 
+Step dependency graph (resetting a step auto-resets all downstream):
+```
+research → enhance → tts ─┬→ slides → compose → verify
+                           ├→ mix_audio ──↗
+              music ───────┘
+              video ──→ slides
+```
+
 ### Module Layout
 
 - **`src/cli.ts`** — Commander.js CLI entry point. All commands route through `pipeline.ts`.
 - **`src/core/pipeline.ts`** — Main orchestrator. Runs steps in order, manages state transitions, loads cached results between steps. This is the "glue" file.
-- **`src/core/state.ts`** — `PipelineStateManager` persists step status/outputs to JSON. Backfills new steps automatically when step order changes.
+- **`src/core/state.ts`** — `PipelineStateManager` persists step status/outputs to JSON. Backfills new steps automatically when step order changes. `resetWithCascade()` uses the `DOWNSTREAM` dependency map to auto-reset dependent steps.
 - **`src/types.ts`** — All shared interfaces. `StepName` union type must match `STEP_ORDER` in `state.ts`.
 - **`src/config/schema.ts`** — Zod schemas for YAML project configs. Adding a new config field requires updating both the Zod schema and the `ProjectConfig` type.
 - **`src/api/kie-client.ts`** — Kie.ai HTTP client. All AI generation (TTS, music, video) goes through this. Tasks are async: create → poll → download. Polling uses exponential backoff (3s initial, 1.5x multiplier, 30s cap).

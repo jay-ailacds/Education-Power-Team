@@ -398,6 +398,78 @@ function countScripts(config: ProjectConfig): number {
   return count;
 }
 
+/**
+ * Reset a pipeline step + all downstream dependents.
+ * If --all is passed, resets everything.
+ */
+export async function resetPipelineStep(
+  configPath: string,
+  step: StepName | "all"
+): Promise<void> {
+  const config = loadConfig(configPath);
+  const configContent = readFileSync(resolve(configPath), "utf-8");
+  const outputDir = resolve(dirname(configPath), config.output.directory, config.project.slug);
+  const state = new PipelineStateManager(outputDir, configContent, config.project.slug);
+
+  if (step === "all") {
+    state.resetAll();
+    logger.step("RESET", "All steps reset to pending");
+    return;
+  }
+
+  const resetSteps = state.resetWithCascade(step);
+  logger.step("RESET", `Reset ${resetSteps.length} steps: ${resetSteps.join(" → ")}`);
+}
+
+/**
+ * Regenerate a specific scene's asset for a given step.
+ * Deletes the cached file so next pipeline run regenerates it.
+ */
+export async function regenSceneAsset(
+  configPath: string,
+  sceneId: string,
+  step: "tts" | "video" | "slides"
+): Promise<void> {
+  const { unlinkSync } = await import("node:fs");
+  const config = loadConfig(configPath);
+  const configContent = readFileSync(resolve(configPath), "utf-8");
+  const outputDir = resolve(dirname(configPath), config.output.directory, config.project.slug);
+  const state = new PipelineStateManager(outputDir, configContent, config.project.slug);
+
+  // Map step → cached file paths
+  const filesToDelete: string[] = [];
+  switch (step) {
+    case "tts":
+      filesToDelete.push(join(outputDir, "audio", "voiceover", `${sceneId}.mp3`));
+      break;
+    case "video":
+      filesToDelete.push(join(outputDir, "video", "clips", `${sceneId}.mp4`));
+      break;
+    case "slides":
+      filesToDelete.push(join(outputDir, "slides", "images", `${sceneId}.png`));
+      filesToDelete.push(join(outputDir, "slides", "clips", `${sceneId}.mp4`));
+      break;
+  }
+
+  let deleted = 0;
+  for (const f of filesToDelete) {
+    if (existsSync(f)) {
+      unlinkSync(f);
+      logger.info(`  Deleted: ${f}`);
+      deleted++;
+    }
+  }
+
+  if (deleted === 0) {
+    logger.warn(`No cached files found for scene "${sceneId}" in step "${step}"`);
+  }
+
+  // Reset the step + downstream so pipeline re-runs them
+  const resetSteps = state.resetWithCascade(step);
+  logger.step("REGEN", `Cleared ${deleted} file(s) for "${sceneId}". Reset: ${resetSteps.join(" → ")}`);
+  logger.info(`  Run 'resume' to regenerate: npx tsx src/cli.ts resume ${configPath}`);
+}
+
 export async function showStatus(configPath: string): Promise<void> {
   const config = loadConfig(configPath);
   const configContent = readFileSync(resolve(configPath), "utf-8");

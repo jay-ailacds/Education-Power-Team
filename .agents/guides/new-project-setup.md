@@ -230,19 +230,51 @@ npx tsx src/cli.ts render projects/my-client.yaml --force
 npx tsx src/cli.ts render projects/my-client.yaml --dry-run
 ```
 
-### Re-running Individual Steps
+### Re-running Steps (reset command)
 
-To re-run a specific step (e.g., regenerate slides after changing content):
+Use `reset` to re-run a step — it automatically resets all downstream steps too:
 
-1. Edit `output/{slug}/.pipeline-state.json`
-2. Set the step's `status` to `"pending"` (and any downstream steps too)
-3. Run `npx tsx src/cli.ts resume projects/{slug}.yaml`
+```bash
+cd pipeline
 
-Common re-run patterns:
-- Changed slide content → reset `slides` + `compose`
-- Changed scripts → reset `tts` + `slides` + `mix_audio` + `compose`
-- Changed music style → reset `music` + `mix_audio` + `compose`
-- Changed video prompts → reset `video` + `slides` + `compose`
+# Changed voiceover scripts → reset tts (auto-resets slides, mix_audio, compose)
+npx tsx src/cli.ts reset projects/{slug}.yaml tts
+
+# Changed slide content → reset slides (auto-resets compose)
+npx tsx src/cli.ts reset projects/{slug}.yaml slides
+
+# Changed music style → reset music (auto-resets mix_audio, compose)
+npx tsx src/cli.ts reset projects/{slug}.yaml music
+
+# Changed video prompts → reset video (auto-resets slides, compose)
+npx tsx src/cli.ts reset projects/{slug}.yaml video
+
+# Reset everything
+npx tsx src/cli.ts reset projects/{slug}.yaml --all
+
+# Then resume to regenerate
+npx tsx src/cli.ts resume projects/{slug}.yaml
+```
+
+### Regenerating a Single Scene (regen command)
+
+To regenerate just one scene's voiceover, video clip, or slide without re-running the entire step:
+
+```bash
+cd pipeline
+
+# Regenerate one scene's voiceover
+npx tsx src/cli.ts regen projects/{slug}.yaml --scene scene5a-vardhman --step tts
+
+# Regenerate one scene's video clip
+npx tsx src/cli.ts regen projects/{slug}.yaml --scene scene5a-vardhman --step video
+
+# Regenerate one scene's slide
+npx tsx src/cli.ts regen projects/{slug}.yaml --scene scene5a-vardhman --step slides
+
+# Then resume to rebuild downstream
+npx tsx src/cli.ts resume projects/{slug}.yaml
+```
 
 ## Voice Options
 

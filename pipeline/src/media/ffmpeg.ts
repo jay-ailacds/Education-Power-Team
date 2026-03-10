@@ -165,7 +165,6 @@ export async function ffmpegMux(
     "-b:a", "192k",
     "-map", "0:v:0",
     "-map", "1:a:0",
-    "-shortest",
     "-movflags", "+faststart",
     outputFile,
   ]);
@@ -179,6 +178,7 @@ export async function ffmpegTrimAudio(
 ): Promise<void> {
   await runCommand("ffmpeg", [
     "-y",
+    "-stream_loop", "-1",   // Loop music if shorter than target duration
     "-i", inputFile,
     "-t", String(durationSec),
     "-af", `afade=t=out:st=${Math.max(0, durationSec - fadeOutSec)}:d=${fadeOutSec}`,

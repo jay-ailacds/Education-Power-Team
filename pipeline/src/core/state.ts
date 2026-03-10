@@ -5,6 +5,27 @@ import type { PipelineState, StepName, StepState, StepOutput } from "../types.ts
 
 const STEP_ORDER: StepName[] = ["research", "enhance", "tts", "music", "video", "slides", "mix_audio", "compose", "verify"];
 
+/**
+ * Step dependency map: for each step, the list of steps that depend on it (directly or indirectly).
+ * Resetting a step also resets everything downstream.
+ *
+ *   research → enhance → tts ─┬→ slides → compose
+ *                              ├→ mix_audio ──↗
+ *                 music ───────┘
+ *                 video ──→ slides
+ */
+const DOWNSTREAM: Record<StepName, StepName[]> = {
+  research: ["enhance", "tts", "slides", "mix_audio", "compose", "verify"],
+  enhance:  ["tts", "slides", "mix_audio", "compose", "verify"],
+  tts:      ["slides", "mix_audio", "compose", "verify"],
+  music:    ["mix_audio", "compose", "verify"],
+  video:    ["slides", "compose", "verify"],
+  slides:   ["compose", "verify"],
+  mix_audio: ["compose", "verify"],
+  compose:  ["verify"],
+  verify:   [],
+};
+
 function defaultSteps(): Record<StepName, StepState> {
   const steps: Record<string, StepState> = {};
   for (const s of STEP_ORDER) {
@@ -88,6 +109,24 @@ export class PipelineStateManager {
   resetStep(step: StepName): void {
     this.state.steps[step] = { status: "pending" };
     this.save();
+  }
+
+  /** Reset a step and all its downstream dependents. Returns list of reset step names. */
+  resetWithCascade(step: StepName): StepName[] {
+    const toReset = [step, ...DOWNSTREAM[step]];
+    for (const s of toReset) {
+      this.state.steps[s] = { status: "pending" };
+    }
+    this.save();
+    return toReset;
+  }
+
+  static get stepOrder(): StepName[] {
+    return [...STEP_ORDER];
+  }
+
+  static getDownstream(step: StepName): StepName[] {
+    return [...DOWNSTREAM[step]];
   }
 
   resetAll(): void {
