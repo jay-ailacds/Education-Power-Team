@@ -12,6 +12,7 @@ export interface ProjectConfig {
   music: MusicConfig;
   visual: VisualConfig;
   audio_mix: AudioMixConfig;
+  slides?: SlideConfig;
   scenes: SceneConfig[];
 }
 
@@ -81,6 +82,9 @@ export interface SceneSegment {
   duration_hint_ms: number;
   image?: string;
   video_prompt?: string;
+  slide_title?: string;
+  slide_stat?: string;
+  slide_tagline?: string;
 }
 
 export interface SceneConfig {
@@ -91,15 +95,19 @@ export interface SceneConfig {
   video_prompt?: string;
   transition?: string;
   segments?: SceneSegment[];
+  slide_title?: string;
+  slide_stat?: string;
+  slide_tagline?: string;
 }
 
 // Pipeline state types
-export type StepName = "research" | "enhance" | "tts" | "music" | "video" | "mix_audio" | "compose" | "verify";
+export type StepName = "research" | "enhance" | "tts" | "music" | "video" | "slides" | "mix_audio" | "compose" | "verify";
 export type StepStatus = "pending" | "running" | "completed" | "failed";
 
 export interface StepOutput {
   file?: string;
   files?: Record<string, { file: string; duration_ms: number }>;
+  clips?: VideoClipInfo[];
   duration_ms?: number;
 }
 
@@ -117,6 +125,49 @@ export interface PipelineState {
   started_at: string;
   project_slug: string;
   steps: Record<StepName, StepState>;
+}
+
+// Slide generation types
+export interface SlideStyle {
+  canvas_width?: number;
+  canvas_height?: number;
+  background_gradient?: string[];
+  title_font_size?: number;
+  stat_font_size?: number;
+  tagline_font_size?: number;
+  title_color?: string;
+  stat_color?: string;
+  tagline_color?: string;
+  accent_line_color?: string;
+  font_family?: string;
+  font_path?: string;
+  min_slide_duration_sec?: number;
+  ken_burns_zoom?: number;
+  duration_offset_sec?: number;  // Trim each slide duration (negative = shorter). Default: -1.0
+}
+
+export interface SlideConfig {
+  enabled: boolean;
+  style?: SlideStyle;
+}
+
+export interface SlideContent {
+  title: string;
+  stat?: string;
+  tagline?: string;
+}
+
+export interface VideoClipInfo {
+  sceneId: string;
+  file: string;
+  duration_ms: number;
+}
+
+export interface SlideResult {
+  sceneId: string;
+  imageFile: string;
+  videoFile: string;
+  duration_ms: number;
 }
 
 // Kie.ai API types
@@ -170,4 +221,5 @@ export interface MusicResult {
 export interface VideoResult {
   file: string;
   duration_ms: number;
+  clips?: VideoClipInfo[];
 }

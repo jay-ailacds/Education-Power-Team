@@ -3,7 +3,7 @@ import { join, dirname } from "node:path";
 import { createHash } from "node:crypto";
 import type { PipelineState, StepName, StepState, StepOutput } from "../types.ts";
 
-const STEP_ORDER: StepName[] = ["research", "enhance", "tts", "music", "video", "mix_audio", "compose", "verify"];
+const STEP_ORDER: StepName[] = ["research", "enhance", "tts", "music", "video", "slides", "mix_audio", "compose", "verify"];
 
 function defaultSteps(): Record<StepName, StepState> {
   const steps: Record<string, StepState> = {};

@@ -79,6 +79,9 @@ const sceneSegmentSchema = z.object({
   duration_hint_ms: z.number().min(500).default(4000),
   image: z.string().optional(),
   video_prompt: z.string().optional(),
+  slide_title: z.string().optional(),
+  slide_stat: z.string().optional(),
+  slide_tagline: z.string().optional(),
 });
 
 const sceneSchema = z.object({
@@ -89,6 +92,32 @@ const sceneSchema = z.object({
   video_prompt: z.string().optional(),
   transition: z.string().optional(),
   segments: z.array(sceneSegmentSchema).optional(),
+  slide_title: z.string().optional(),
+  slide_stat: z.string().optional(),
+  slide_tagline: z.string().optional(),
+});
+
+const slideStyleSchema = z.object({
+  canvas_width: z.number().default(1920),
+  canvas_height: z.number().default(1080),
+  background_gradient: z.array(z.string()).default(["#1a1a2e", "#16213e", "#0f3460"]),
+  title_font_size: z.number().default(64),
+  stat_font_size: z.number().default(48),
+  tagline_font_size: z.number().default(32),
+  title_color: z.string().default("#ffffff"),
+  stat_color: z.string().default("#00d4ff"),
+  tagline_color: z.string().default("#cccccc"),
+  accent_line_color: z.string().default("#00d4ff"),
+  font_family: z.string().default("Avenir Next"),
+  font_path: z.string().default("/System/Library/Fonts/Avenir Next.ttc"),
+  min_slide_duration_sec: z.number().default(2.0),
+  ken_burns_zoom: z.number().min(1.0).max(1.3).default(1.08),
+  duration_offset_sec: z.number().min(-5).max(0).default(-1.0),
+});
+
+const slideConfigSchema = z.object({
+  enabled: z.boolean().default(false),
+  style: slideStyleSchema.optional(),
 });
 
 export const projectConfigSchema = z.object({
@@ -103,6 +132,7 @@ export const projectConfigSchema = z.object({
   music: musicSchema.default({}),
   visual: visualSchema.default({}),
   audio_mix: audioMixSchema.default({}),
+  slides: slideConfigSchema.optional(),
   scenes: z.array(sceneSchema).min(1),
 });
 

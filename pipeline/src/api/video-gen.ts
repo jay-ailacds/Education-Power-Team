@@ -2,15 +2,9 @@ import { mkdirSync, existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { KieClient } from "./kie-client.ts";
 import { ImageHostServer, startCloudflaredTunnel } from "./image-host.ts";
-import { ffprobe, ffmpegConcat } from "../media/ffmpeg.ts";
+import { ffprobe, ffmpegConcat, ffmpegConcatReencode } from "../media/ffmpeg.ts";
 import { logger } from "../core/logger.ts";
-import type { SceneConfig, VisualConfig, VideoResult } from "../types.ts";
-
-interface VideoClip {
-  sceneId: string;
-  file: string;
-  duration_ms: number;
-}
+import type { SceneConfig, VisualConfig, VideoResult, VideoClipInfo, SlideResult } from "../types.ts";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
@@ -121,7 +115,7 @@ export async function generateVideoClips(
   }
 
   try {
-    const clips: VideoClip[] = [];
+    const clips: VideoClipInfo[] = [];
 
     for (const job of videoJobs) {
       // Skip if clip already exists (partial resume)
@@ -249,9 +243,64 @@ export async function generateVideoClips(
     const probe = await ffprobe(outputFile);
     logger.step("VIDEO", `Combined video: ${Math.round(probe.duration)}s from ${clips.length} clips`);
 
-    return { file: outputFile, duration_ms: Math.round(probe.duration * 1000) };
+    return {
+      file: outputFile,
+      duration_ms: Math.round(probe.duration * 1000),
+      clips: clips.map(c => ({ sceneId: c.sceneId, file: c.file, duration_ms: c.duration_ms })),
+    };
   } finally {
     if (imageHost.isRunning) await imageHost.stop();
     if (tunnelKill) tunnelKill();
   }
+}
+
+export async function interleaveClipsWithSlides(
+  videoClips: VideoClipInfo[],
+  slideResults: SlideResult[],
+  outputDir: string
+): Promise<VideoResult> {
+  const slideMap = new Map<string, SlideResult>();
+  for (const slide of slideResults) {
+    slideMap.set(slide.sceneId, slide);
+  }
+
+  // Build ordered file list: Veo clip, then slide clip, for each scene
+  const orderedFiles: string[] = [];
+  const allClips: VideoClipInfo[] = [];
+
+  for (const clip of videoClips) {
+    orderedFiles.push(clip.file);
+    allClips.push(clip);
+
+    const slide = slideMap.get(clip.sceneId);
+    if (slide) {
+      orderedFiles.push(slide.videoFile);
+      allClips.push({
+        sceneId: `${clip.sceneId}-slide`,
+        file: slide.videoFile,
+        duration_ms: slide.duration_ms,
+      });
+    }
+  }
+
+  const rawDir = join(outputDir, "video", "raw");
+  mkdirSync(rawDir, { recursive: true });
+  const outputFile = join(rawDir, "combined.mp4");
+
+  logger.info(`  Interleaving ${videoClips.length} video clips + ${slideResults.length} slides`);
+
+  // Try codec-copy concat first; fall back to re-encode if it fails
+  try {
+    await ffmpegConcat(orderedFiles, outputFile);
+  } catch {
+    logger.warn("  Codec-copy concat failed, falling back to re-encode");
+    await ffmpegConcatReencode(orderedFiles, outputFile, { width: 1280, height: 720, fps: 24 });
+  }
+
+  const probe = await ffprobe(outputFile);
+  return {
+    file: outputFile,
+    duration_ms: Math.round(probe.duration * 1000),
+    clips: allClips,
+  };
 }

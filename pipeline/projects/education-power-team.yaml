@@ -58,10 +58,35 @@ audio_mix:
   fade_out_seconds: 2.0
   gap_between_scenes_seconds: 0.3
 
+slides:
+  enabled: true
+  style:
+    canvas_width: 1920
+    canvas_height: 1080
+    background_gradient:
+      - "#1a1a2e"
+      - "#16213e"
+      - "#0f3460"
+    title_font_size: 64
+    stat_font_size: 48
+    tagline_font_size: 32
+    title_color: "#ffffff"
+    stat_color: "#00d4ff"
+    tagline_color: "#cccccc"
+    accent_line_color: "#00d4ff"
+    font_family: "Avenir Next"
+    font_path: "/System/Library/Fonts/Avenir Next.ttc"
+    min_slide_duration_sec: 1.5
+    ken_burns_zoom: 1.08
+    duration_offset_sec: -0.3
+
 scenes:
   - id: scene1-hook
     duration_hint_ms: 3000
     script: "Planning to build or upgrade an educational institute?"
+    slide_title: "Education Power Team"
+    slide_stat: "260 million students across India"
+    slide_tagline: "Building the future of education"
     image: "../../attached_assets/campus_ecosystem.png"
     video_prompt: >
       Aerial view of an empty plot of land slowly transforming into a modern
@@ -75,6 +100,9 @@ scenes:
       Every educational institute begins with a vision.
       But building a future-ready institute today requires
       much more than infrastructure.
+    slide_title: "The Vision"
+    slide_stat: "National Education Policy 2020"
+    slide_tagline: "More than bricks and mortar"
     image: "../../attached_assets/smart_classroom_safe.png"
     video_prompt: >
       Blueprint animation transforming into real buildings. Modern classrooms
@@ -89,6 +117,9 @@ scenes:
       It requires smart classrooms, advanced technology,
       structured sports development, efficient administration,
       and future-ready skills.
+    slide_title: "Modern Requirements"
+    slide_stat: "4,000+ schools with smart classrooms"
+    slide_tagline: "Future-ready skills for today's students"
     image: "../../attached_assets/it_lab_advanced.png"
     video_prompt: >
       Quick montage: smart classroom with digital board, computer lab with
@@ -101,6 +132,9 @@ scenes:
     script: >
       Introducing the Education Power Team — a complete
       360-degree ecosystem for educational institutes.
+    slide_title: "Education Power Team"
+    slide_stat: "Complete 360-degree ecosystem"
+    slide_tagline: "From infrastructure to innovation"
     image: "../../attached_assets/campus_ecosystem.png"
     video_prompt: >
       Multiple service icons connecting into a single ecosystem diagram,
@@ -115,6 +149,9 @@ scenes:
       - id: scene5a-vardhman
         script: "Vardhman Traders builds modern classroom and laboratory infrastructure."
         duration_hint_ms: 4500
+        slide_title: "Vardhman Traders"
+        slide_stat: "95% agree facilities boost performance"
+        slide_tagline: "Classroom & laboratory infrastructure"
         image: "../../attached_assets/vardhman_classroom.png"
         video_prompt: >
           Modern classroom being constructed, desks being arranged,
@@ -124,6 +161,9 @@ scenes:
       - id: scene5b-megabyte
         script: "Mega Byte Systems delivers advanced IT systems, networking, and digital labs."
         duration_hint_ms: 4500
+        slide_title: "Mega Byte Systems"
+        slide_stat: "Powering digital classrooms"
+        slide_tagline: "IT systems, networking & digital labs"
         image: "../../attached_assets/computerlabs_1773047158875.jpg"
         video_prompt: >
           Modern computer lab with rows of monitors glowing, networking cables
@@ -133,6 +173,9 @@ scenes:
       - id: scene5c-acepower
         script: "Ace Power ensures reliable power backup for uninterrupted operations."
         duration_hint_ms: 4500
+        slide_title: "Ace Power"
+        slide_stat: "24/7 power backup"
+        slide_tagline: "Learning never stops"
         image: "../../attached_assets/Batteris_1773047158874.webp"
         video_prompt: >
           Industrial generators and battery backup systems powering a school
@@ -141,6 +184,9 @@ scenes:
       - id: scene5d-athletos
         script: "Athletos Sports Foundation develops structured sports infrastructure and training."
         duration_hint_ms: 4500
+        slide_title: "Athletos Sports Foundation"
+        slide_stat: "AI-enabled coaching"
+        slide_tagline: "Grassroots to national-level excellence"
         image: "../../attached_assets/sports_academy_1773047158873.jpeg"
         video_prompt: >
           Students playing on a modern sports field, running track, cricket
@@ -154,6 +200,9 @@ scenes:
       - id: scene6a-aksolutions
         script: "A.K. Solutions streamlines administration with ERP and automation."
         duration_hint_ms: 3500
+        slide_title: "A.K. Solutions"
+        slide_stat: "Near-perfect accuracy"
+        slide_tagline: "ERP & administration automation"
         image: "../../attached_assets/tally_1773047158873.jpg"
         video_prompt: >
           ERP dashboard on a computer screen, school administrator managing
@@ -162,6 +211,9 @@ scenes:
       - id: scene6b-rootsquare
         script: "Root Square LLP manages uniforms and stationery supply systems."
         duration_hint_ms: 3500
+        slide_title: "Root Square LLP"
+        slide_stat: "Equipped from day one"
+        slide_tagline: "Uniforms & stationery supply"
         image: "../../attached_assets/root_square_supplies.png"
         video_prompt: >
           Neatly arranged uniforms on display racks, organized stationery
@@ -171,6 +223,9 @@ scenes:
       - id: scene6c-ailacds
         script: "AI-LA-CDS empowers institutes with AI skills programs, AI summer camps, and AI-enabled learning platforms."
         duration_hint_ms: 3500
+        slide_title: "AI-LA-CDS"
+        slide_stat: "AI fluency is essential"
+        slide_tagline: "AI skills programs & learning platforms"
         image: "../../attached_assets/ai_learning_platform.png"
         video_prompt: >
           Laptop screens showing AI interfaces and neural network visualizations,
@@ -181,6 +236,9 @@ scenes:
       - id: scene6d-asperia
         script: "Asperia Institute provides skill-based training programs for medical students across PAN India."
         duration_hint_ms: 3500
+        slide_title: "Asperia Institute"
+        slide_stat: "PAN India reach"
+        slide_tagline: "Skill-based medical training"
         image: "../../attached_assets/skillbasedmedical_1773047158871.webp"
         video_prompt: >
           Medical training classroom, students in lab coats practicing,
@@ -190,6 +248,9 @@ scenes:
   - id: scene7-foresight
     duration_hint_ms: 4000
     script: "Global Foresight guides students with career counseling and higher education planning."
+    slide_title: "Global Foresight"
+    slide_stat: "Universities & careers worldwide"
+    slide_tagline: "Career counseling & higher education"
     image: "../../attached_assets/global_foresight_counseling.png"
     video_prompt: >
       Indian students discussing career plans with a mentor at a desk,
@@ -200,6 +261,9 @@ scenes:
   - id: scene8-final
     duration_hint_ms: 4000
     script: "One powerful ecosystem for building the future of education."
+    slide_title: "Education Power Team"
+    slide_stat: "Eight specialized partners"
+    slide_tagline: "Building the future of education"
     image: "../../attached_assets/campus_ecosystem.png"
     video_prompt: >
       All service icons connecting around a modern campus aerial view.

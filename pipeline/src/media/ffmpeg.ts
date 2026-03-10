@@ -208,6 +208,41 @@ export async function ffmpegConvertWebm(
   await runCommand("ffmpeg", args);
 }
 
+export async function ffmpegImageToVideo(
+  imagePath: string,
+  outputFile: string,
+  options: {
+    durationSec: number;
+    width: number;
+    height: number;
+    fps: number;
+    zoom?: number;
+  }
+): Promise<void> {
+  const { durationSec, width, height, fps, zoom = 1.08 } = options;
+  const totalFrames = Math.ceil(durationSec * fps);
+  const zoomIncrement = (zoom - 1.0) / totalFrames;
+
+  const vf = [
+    `scale=8000:-1`,
+    `zoompan=z='min(1.0+${zoomIncrement}*on\\,${zoom})':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${totalFrames}:s=${width}x${height}:fps=${fps}`,
+  ].join(",");
+
+  await runCommand("ffmpeg", [
+    "-y",
+    "-loop", "1",
+    "-framerate", String(fps),
+    "-i", imagePath,
+    "-vf", vf,
+    "-t", String(durationSec),
+    "-c:v", "libx264",
+    "-crf", "18",
+    "-pix_fmt", "yuv420p",
+    "-movflags", "+faststart",
+    outputFile,
+  ]);
+}
+
 function runCommand(cmd: string, args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
     logger.debug(`${cmd} ${args.join(" ")}`);

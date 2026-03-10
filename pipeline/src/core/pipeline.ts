@@ -6,13 +6,14 @@ import { PipelineStateManager } from "./state.ts";
 import { KieClient } from "../api/kie-client.ts";
 import { generateVoiceovers } from "../api/tts.ts";
 import { generateMusic } from "../api/music.ts";
-import { generateVideoClips } from "../api/video-gen.ts";
+import { generateVideoClips, interleaveClipsWithSlides } from "../api/video-gen.ts";
 import { ExaClient, researchScenes, type ResearchResult } from "../api/research.ts";
 import { loadEnhancedScripts, applyEnhancements } from "../api/enhance.ts";
 import { mixAudio } from "../media/audio-mixer.ts";
 import { composeVideo, useLocalVideo } from "../media/video-composer.ts";
 import { logger } from "./logger.ts";
-import type { ProjectConfig, TTSResult, MusicResult, StepName } from "../types.ts";
+import { generateAllSlides, DEFAULT_SLIDE_STYLE } from "../media/slide-gen.ts";
+import type { ProjectConfig, TTSResult, MusicResult, StepName, VideoClipInfo, SlideResult, SlideStyle } from "../types.ts";
 
 export interface PipelineOptions {
   force?: boolean;
@@ -202,6 +203,7 @@ export async function runPipeline(
 
   // ─── Step 3: Video generation ───
   let videoFile = "";
+  let videoClips: VideoClipInfo[] = [];
 
   if (shouldRun("video", state, options)) {
     state.markRunning("video");
@@ -225,9 +227,11 @@ export async function runPipeline(
           outputDir
         );
         videoFile = result.file;
+        videoClips = result.clips || [];
         state.markCompleted("video", {
           file: result.file,
           duration_ms: result.duration_ms,
+          clips: result.clips,
         });
       } else if (config.visual.source === "react-capture") {
         const { captureReactVideo } = await import("../api/react-capture.ts");
@@ -255,7 +259,55 @@ export async function runPipeline(
     }
   } else if (state.isCompleted("video")) {
     videoFile = state.get("video").outputs?.file || "";
+    videoClips = (state.get("video").outputs?.clips as VideoClipInfo[]) || [];
     logger.info("  VIDEO: using cached results");
+  }
+
+  // ─── Step 3.5: Generate slides (interleave with video clips) ───
+  let slideResults: SlideResult[] = [];
+
+  if (shouldRun("slides", state, options)) {
+    if (config.slides?.enabled && videoClips.length > 0 && ttsResults.length > 0) {
+      state.markRunning("slides");
+      try {
+        const slideStyle = { ...DEFAULT_SLIDE_STYLE, ...config.slides.style } as Required<SlideStyle>;
+        slideResults = await generateAllSlides(
+          config.scenes,
+          ttsResults,
+          videoClips,
+          config.audio_mix.gap_between_scenes_seconds,
+          slideStyle,
+          outputDir
+        );
+
+        // Interleave slides with Veo clips → new combined.mp4
+        if (slideResults.length > 0) {
+          const combined = await interleaveClipsWithSlides(videoClips, slideResults, outputDir);
+          videoFile = combined.file;
+          state.markCompleted("slides", {
+            file: combined.file,
+            duration_ms: combined.duration_ms,
+            clips: combined.clips,
+          });
+          logger.step("SLIDES", `Interleaved ${slideResults.length} slides → ${Math.round(combined.duration_ms / 1000)}s video`);
+        } else {
+          state.markCompleted("slides");
+          logger.info("  SLIDES: no slides needed (all scenes filled by Veo clips)");
+        }
+      } catch (err) {
+        state.markFailed("slides", (err as Error).message);
+        throw err;
+      }
+    } else {
+      logger.info("  SLIDES: disabled or missing data");
+      state.markCompleted("slides");
+    }
+  } else if (state.isCompleted("slides")) {
+    const slidesOutput = state.get("slides").outputs;
+    if (slidesOutput?.file) {
+      videoFile = slidesOutput.file;
+    }
+    logger.info("  SLIDES: using cached results");
   }
 
   // ─── Step 4: Audio mixing ───
@@ -331,6 +383,7 @@ function printPlan(config: ProjectConfig): void {
   console.log(`  1. TTS: ${countScripts(config)} voiceover clips via ${config.voice.provider}`);
   console.log(`  2. MUSIC: ${config.music.provider} (${config.music.mode || "instrumental"})`);
   console.log(`  3. VIDEO: ${config.visual.source}`);
+  console.log(`  3.5 SLIDES: ${config.slides?.enabled ? "enabled" : "disabled"}`);
   console.log(`  4. MIX: voiceover @ ${config.audio_mix.voiceover_volume_db}dB + music @ ${config.audio_mix.music_volume_db}dB`);
   console.log(`  5. COMPOSE: ${config.output.resolution.width}x${config.output.resolution.height} @ ${config.output.fps}fps`);
 }
