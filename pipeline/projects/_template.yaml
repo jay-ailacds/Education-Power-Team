@@ -1,0 +1,180 @@
+# ============================================================================
+# VIDEO PROJECT TEMPLATE
+# ============================================================================
+# Copy this file and rename it to your project slug:
+#   cp _template.yaml my-client-name.yaml
+#
+# Then fill in the sections below. See .agents/guides/new-project-setup.md
+# for the full workflow guide.
+# ============================================================================
+
+version: "1.0"
+
+project:
+  name: "Client Project Name"           # Display name
+  slug: "client-project-name"           # Used for output directory: output/{slug}/
+  description: "Brief description of the video project"
+
+# ── Output Settings ──────────────────────────────────────────────────────────
+# Output lands in: output/{slug}/{slug}.mp4
+# You rarely need to change these defaults.
+output:
+  directory: "../../output"
+  resolution:
+    width: 1920
+    height: 1080
+  fps: 30
+  codec: h264
+  audio_bitrate: "192k"
+  crf: 18
+  max_file_size_mb: 50
+
+# ── Voice Settings ───────────────────────────────────────────────────────────
+# ElevenLabs TTS via Kie.ai
+# Common voice_id options: Daniel, Rachel, Adam, Emily, Sam
+voice:
+  provider: elevenlabs
+  model: "elevenlabs/text-to-speech-multilingual-v2"
+  voice_id: "Daniel"
+  settings:
+    stability: 0.50
+    similarity_boost: 0.75
+    style: 0.30
+    speed: 1.0
+
+# ── Music Settings ───────────────────────────────────────────────────────────
+# AI-generated background music via Suno, or use a local file
+music:
+  provider: suno                         # "suno" for AI, "local" for existing file
+  mode: instrumental
+  style: "Corporate upbeat inspirational, modern, warm, motivational"
+  title: "Project Theme Music"
+  version: "V4"
+  negative_tags: "Heavy Metal, Harsh, Aggressive, Dark, Sad"
+  # local_file: "../../assets/my-client/background-music.mp3"  # if provider: local
+
+# ── Visual Source ────────────────────────────────────────────────────────────
+# Choose ONE source type:
+#   image-to-video  — AI generates video from reference images (best quality)
+#   ai-generate     — AI generates video from text prompts only (no images needed)
+#   local-file      — Use an existing MP4 (InVideo export, screen recording, etc.)
+#   react-capture   — Record React/Framer Motion scenes via Playwright
+visual:
+  source: image-to-video
+  ai_generate:
+    provider: veo
+    model: veo3_fast
+    aspect_ratio: "16:9"
+  # local_file: "../../assets/my-client/existing-video.mp4"   # if source: local-file
+
+# ── Audio Mix ────────────────────────────────────────────────────────────────
+audio_mix:
+  voiceover_volume_db: -6
+  music_volume_db: -18
+  music_duck_db: -24
+  fade_in_seconds: 1.0
+  fade_out_seconds: 2.0
+  gap_between_scenes_seconds: 0.3
+
+# ── Branded Slides ───────────────────────────────────────────────────────────
+# Info-card slides interleaved between video clips.
+# Only scenes with slide_title get a slide. Remove this section to disable.
+slides:
+  enabled: true
+  style:
+    background_gradient:
+      - "#1a1a2e"                        # Dark blue gradient — change to match brand
+      - "#16213e"
+      - "#0f3460"
+    title_font_size: 64
+    stat_font_size: 48
+    tagline_font_size: 32
+    title_color: "#ffffff"
+    stat_color: "#00d4ff"                # Accent color — change to match brand
+    tagline_color: "#cccccc"
+    accent_line_color: "#00d4ff"
+    font_family: "Avenir Next"
+    font_path: "/System/Library/Fonts/Avenir Next.ttc"
+    min_slide_duration_sec: 1.5
+    ken_burns_zoom: 1.08
+    duration_offset_sec: -0.3            # Fine-tune slide timing vs voiceover
+
+# ── Scenes ───────────────────────────────────────────────────────────────────
+# Each scene produces: voiceover clip + video clip + optional branded slide
+#
+# Scene fields:
+#   id:            Unique identifier (kebab-case)
+#   script:        Voiceover text (what the narrator says)
+#   image:         Reference image for AI video generation (optional)
+#   video_prompt:  Text description for AI video generation (optional)
+#   slide_title:   Company/topic name on branded slide (omit = no slide)
+#   slide_stat:    Key statistic shown on slide (optional)
+#   slide_tagline: Short value proposition on slide (optional)
+#   transition:    Visual transition type (optional)
+#   segments:      Sub-scenes (for multi-part scenes like partner showcases)
+#
+# TIP: For multi-partner/multi-product videos, use segments within a scene.
+#      Each segment gets its own voiceover, video clip, and slide.
+scenes:
+
+  # ── Opening / Hook ──
+  - id: scene1-hook
+    duration_hint_ms: 5000
+    script: "Your attention-grabbing opening line goes here."
+    slide_title: "Company Name"
+    slide_stat: "Impressive statistic"
+    slide_tagline: "Core value proposition"
+    image: "../../assets/my-client/hero-image.png"
+    video_prompt: >
+      Describe the visual you want AI to generate.
+      Be specific about setting, lighting, camera movement.
+    transition: fadeBlur
+
+  # ── Main Content ──
+  - id: scene2-problem
+    duration_hint_ms: 8000
+    script: >
+      Describe the problem your client solves.
+      This can be multiple sentences.
+    slide_title: "The Challenge"
+    slide_stat: "Problem statistic"
+    slide_tagline: "Why this matters"
+    image: "../../assets/my-client/problem-visual.png"
+    video_prompt: >
+      Visual representation of the problem.
+    transition: wipe
+
+  # ── Multi-Part Scene (e.g., product features, team members, partners) ──
+  - id: scene3-features
+    duration_hint_ms: 15000
+    transition: slideLeft
+    segments:
+      - id: scene3a-feature-one
+        script: "Description of first feature or partner."
+        duration_hint_ms: 5000
+        slide_title: "Feature One"
+        slide_stat: "Key metric"
+        slide_tagline: "Benefit statement"
+        image: "../../assets/my-client/feature-1.png"
+        video_prompt: >
+          Visual for feature one.
+
+      - id: scene3b-feature-two
+        script: "Description of second feature or partner."
+        duration_hint_ms: 5000
+        slide_title: "Feature Two"
+        slide_stat: "Key metric"
+        slide_tagline: "Benefit statement"
+        image: "../../assets/my-client/feature-2.png"
+        video_prompt: >
+          Visual for feature two.
+
+  # ── Closing ──
+  - id: scene4-closing
+    duration_hint_ms: 5000
+    script: "Your powerful closing statement and call to action."
+    # No slide_title = no slide (let the video clip finish the video)
+    image: "../../assets/my-client/closing.png"
+    video_prompt: >
+      Inspiring closing visual. Logo reveal, cinematic finale.
+    transition: morphExpand

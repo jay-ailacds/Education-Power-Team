@@ -1,159 +1,88 @@
 # New Video Project Setup Guide
 
-How to create a new video project using the pipeline. The pipeline is project-agnostic — each video project provides its own config, assets, and (optionally) React scene components.
+How to create a new video project using the pipeline. Each project gets its own config, assets, and isolated output directory.
 
 ## Quick Start
 
 ```bash
-# 1. Create project config
-cp pipeline/projects/education-power-team.yaml pipeline/projects/my-project.yaml
+# 1. Copy the template
+cp pipeline/projects/_template.yaml pipeline/projects/my-client.yaml
 
-# 2. Edit config with your scenes, voice, music, and visual settings
-# 3. Run the pipeline
+# 2. Create asset directory (if client provided images)
+mkdir -p assets/my-client/
+# Copy client images into assets/my-client/
+
+# 3. Edit the YAML config with your scenes, scripts, and settings
+
+# 4. Validate config
 cd pipeline
-npx tsx src/cli.ts render projects/my-project.yaml --dry-run   # Validate first
-npx tsx src/cli.ts render projects/my-project.yaml             # Full run
+npx tsx src/cli.ts render projects/my-client.yaml --dry-run
+
+# 5. Run the full pipeline
+npx tsx src/cli.ts render projects/my-client.yaml
+
+# 6. Output lands in output/my-client/my-client.mp4
 ```
 
-## Project Structure
-
-A new project needs at minimum a YAML config file. Depending on the visual source, you may also need a React client app or local video files.
+## Project File Layout
 
 ```
 Education-Power-Team/
-├── pipeline/
-│   └── projects/
-│       └── my-project.yaml          ← Required: project config
-├── my-project-assets/               ← Optional: images for image-to-video
-├── my-project-client/               ← Optional: React app for react-capture
-│   ├── src/
-│   │   ├── components/video/
-│   │   │   ├── VideoTemplate.tsx
-│   │   │   └── video_scenes/
-│   │   │       ├── Scene1.tsx
-│   │   │       ├── Scene2.tsx
-│   │   │       └── ...
-│   │   ├── lib/video/hooks.ts       ← Reuse from client/src/lib/video/
-│   │   ├── App.tsx
-│   │   └── main.tsx
-│   └── index.html
-└── my-project-output/               ← Auto-created by pipeline
-    ├── tts/
-    ├── music/
-    ├── video/
-    │   ├── clips/                   ← Per-segment cached clips
-    │   └── raw/
-    └── .pipeline-state.json
+├── pipeline/projects/
+│   ├── _template.yaml                  ← Copy this to start
+│   ├── education-power-team.yaml       ← Existing project
+│   └── my-new-client.yaml             ← Your new project
+├── assets/
+│   ├── campus_ecosystem.png            ← Shared/legacy assets
+│   └── my-new-client/                  ← Per-client asset folder
+│       ├── logo.png
+│       ├── hero-image.png
+│       └── product-photos/
+├── output/
+│   ├── education-power-team/           ← Previous project output (untouched)
+│   └── my-new-client/                  ← New project output (auto-created)
+│       ├── .pipeline-state.json
+│       ├── audio/
+│       ├── video/
+│       ├── slides/
+│       └── my-new-client.mp4           ← Final video
+└── client/                             ← React scenes (only for react-capture)
 ```
 
-## YAML Config Reference
+## Starting Points by Client Scenario
 
-### Minimal Config
+### Scenario A: Client provides product/service images
 
-```yaml
-project:
-  name: "My Project"
-  slug: my-project
-  description: "Short description for research context"
+Most common case. Client sends photos, logos, or marketing images.
 
-scenes:
-  - id: scene1-intro
-    title: "Introduction"
-    script: "Welcome to our product demonstration."
-    video_prompt: "Professional office environment, modern design."
-
-  - id: scene2-features
-    title: "Key Features"
-    script: "Here are the three features that set us apart."
-    video_prompt: "Split-screen showing product features."
-
-  - id: scene3-closing
-    title: "Call to Action"
-    script: "Get started today."
-    video_prompt: "Company logo with contact information."
-
-voice:
-  provider: elevenlabs
-  voice_id: pNInz6obpgDQGcFmaJgB    # ElevenLabs voice ID
-  model: eleven_multilingual_v2
-
-music:
-  provider: suno
-  prompt: "Corporate upbeat background music, professional, modern"
-  mode: instrumental
-
-audio_mix:
-  voiceover_volume_db: 0
-  music_volume_db: -18
-  gap_between_scenes_seconds: 0.5
-
-visual:
-  source: image-to-video              # See "Visual Source Options" below
-
-output:
-  directory: ../my-project-output
-  resolution:
-    width: 1920
-    height: 1080
-  fps: 24
-  format: mp4
-```
-
-### Scenes with Segments
-
-For scenes that contain multiple sub-sections (e.g., a carousel of services):
-
-```yaml
-scenes:
-  - id: scene1-intro
-    title: "Introduction"
-    script: "Welcome."
-    video_prompt: "Opening shot."
-
-  - id: scene2-services
-    title: "Our Services"
-    # No top-level script — segments provide individual scripts
-    segments:
-      - id: scene2a-consulting
-        script: "We offer strategic consulting."
-        video_prompt: "Consultant at whiteboard."
-      - id: scene2b-development
-        script: "Custom software development."
-        video_prompt: "Developer coding on screen."
-      - id: scene2c-support
-        script: "24/7 technical support."
-        video_prompt: "Support team in action."
-
-  - id: scene3-closing
-    title: "Contact Us"
-    script: "Reach out today."
-    video_prompt: "Contact details on screen."
-```
-
-The pipeline flattens segments for TTS and video generation. This config produces **5 clips** (scene1 + 3 segments + scene3), not 3.
-
-## Visual Source Options
-
-### 1. `image-to-video` — AI-generated video from images + prompts
-
-Best for: Projects without custom React animations. Uses Kie.ai (Veo/Runway) to generate video clips from images and text prompts.
+1. Save images to `assets/{client-name}/`
+2. Copy `_template.yaml`, set `visual.source: image-to-video`
+3. Reference images in each scene's `image:` field
+4. Write `video_prompt:` to guide AI on how to animate the image
+5. Run pipeline
 
 ```yaml
 visual:
   source: image-to-video
   ai_generate:
-    provider: veo           # or "runway"
+    provider: veo
     model: veo3_fast
-    aspect_ratio: "16:9"
+
+scenes:
+  - id: scene1
+    script: "Voiceover text"
+    image: "../../assets/client-name/product-photo.png"
+    video_prompt: "Camera slowly zooms into the product, warm lighting..."
 ```
 
-Each scene/segment needs a `video_prompt` and optionally an `image` path pointing to a source image.
+### Scenario B: Client provides no images (text-only brief)
 
-**Requirements**: `KIE_API_KEY` in `.env`
+You only have a script or description. AI generates everything.
 
-### 2. `ai-generate` — AI-generated video from text prompts only
-
-Same as `image-to-video` but without source images. Pure text-to-video generation.
+1. Copy `_template.yaml`, set `visual.source: ai-generate`
+2. Write detailed `video_prompt:` for each scene (this is the only visual input)
+3. No `image:` fields needed
+4. Run pipeline
 
 ```yaml
 visual:
@@ -161,26 +90,45 @@ visual:
   ai_generate:
     provider: veo
     model: veo3_fast
-    aspect_ratio: "16:9"
+
+scenes:
+  - id: scene1
+    script: "Voiceover text"
+    video_prompt: >
+      Detailed description of what to show. Be specific about
+      setting, people, actions, lighting, camera angle.
 ```
 
-**Requirements**: `KIE_API_KEY` in `.env`
+### Scenario C: Client provides an existing video (InVideo, screen recording, etc.)
 
-### 3. `local-file` — Pre-recorded video file
+Client already has a video file and wants voiceover + music added.
 
-Best for: Using existing footage, screen recordings, or externally produced video.
+1. Save the video to `assets/{client-name}/video.mp4`
+2. Copy `_template.yaml`, set `visual.source: local-file`
+3. Scenes still define scripts for voiceover, but no `video_prompt` needed
+4. Run pipeline — it will add voiceover + music to the existing video
 
 ```yaml
 visual:
   source: local-file
-  local_file: ../path/to/my-video.mp4
+  local_file: "../../assets/client-name/video.mp4"
+
+scenes:
+  - id: scene1
+    script: "Voiceover text"
+    # No image or video_prompt needed
 ```
 
-**Requirements**: An MP4 file on disk
+**Note:** With `local-file`, slides are less useful since you can't interleave them with a pre-existing video. Set `slides.enabled: false` unless you want the pipeline to attempt interleaving.
 
-### 4. `react-capture` — Automated browser recording of React animations
+### Scenario D: You build animated React scenes
 
-Best for: Custom animated scenes built with React + Framer Motion. The pipeline launches a browser, records each scene/segment individually, and concatenates the clips.
+For custom animated presentations using React + Framer Motion.
+
+1. Create scene components in `client/src/components/video/video_scenes/`
+2. Copy `_template.yaml`, set `visual.source: react-capture`
+3. Playwright will record each scene from the browser
+4. Run pipeline
 
 ```yaml
 visual:
@@ -191,239 +139,186 @@ visual:
     viewport:
       width: 1920
       height: 1080
-    hide_cursor: true
-    per_segment: true               # true = 1 clip per segment, false = 1 clip per scene
-    recording_timeout_ms: 120000
-    wait_after_load_ms: 1000
+    per_segment: true
 ```
 
-**Requirements**: Playwright + Chromium, a React client app (see below)
+## Writing Effective Scenes
 
-## Building a React Client for `react-capture`
+### Scene Structure
 
-### Contract
+Each scene needs at minimum an `id` and `script`. Everything else is optional.
 
-The pipeline's react-capture module expects the React app to satisfy this contract:
-
-| Requirement | Details |
-|-------------|---------|
-| **URL params** | `?scene=N` renders scene N in isolation (1-based). `?scene=N&segment=M` renders segment M of scene N. No params = full video. |
-| **Recording hooks** | App uses `useVideoPlayer` hook which calls `window.startRecording()` on mount and `window.stopRecording()` when the scene/segment finishes. |
-| **Duration exports** | `VideoTemplate.tsx` exports `SCENE_DURATIONS` (scene key → ms) and `SEGMENT_DURATIONS` (scene number → segment number → ms). |
-| **Self-contained scenes** | Each scene component manages its own animations, images, and timing internally. |
-| **No audio** | The React app is silent — audio comes from the pipeline's TTS and music steps. |
-
-### Reusable Code
-
-Copy these files from the reference project — they are project-agnostic:
-
-```
-client/src/lib/video/hooks.ts       → useVideoPlayer, useSceneTimer hooks
-client/src/lib/video/animations.ts  → Framer Motion transition presets
-client/src/lib/video/index.ts       → Barrel export
+```yaml
+- id: scene-name              # Required: unique kebab-case identifier
+  script: "Narration text"     # Required: what the voiceover says
+  duration_hint_ms: 5000       # Hint for TTS pacing (actual duration from TTS)
+  image: "path/to/image.png"   # Optional: reference image for AI video
+  video_prompt: "description"  # Optional: what the AI should generate visually
+  slide_title: "Title"         # Optional: branded slide (omit = no slide)
+  slide_stat: "Statistic"      # Optional: key metric on slide
+  slide_tagline: "Tagline"     # Optional: value proposition on slide
+  transition: fadeBlur          # Optional: transition effect
 ```
 
-### App.tsx Pattern
+### Using Segments
 
-```typescript
-import VideoTemplate, { SCENE_DURATIONS, SEGMENT_DURATIONS } from "./components/video/VideoTemplate";
-import { useVideoPlayer } from "./lib/video/hooks";
-// Import your scene components
-import { Scene1, Scene2, Scene3 } from "./components/video/video_scenes";
+For multi-part scenes (partner showcases, feature lists, team introductions):
 
-const SCENE_COMPONENTS = [Scene1, Scene2, Scene3];
+```yaml
+- id: section-name
+  duration_hint_ms: 20000
+  segments:
+    - id: section-partner-a
+      script: "Partner A does X."
+      duration_hint_ms: 5000
+      slide_title: "Partner A"
+      slide_stat: "Key stat"
+      image: "../../assets/client/partner-a.png"
+      video_prompt: "Visual for partner A"
 
-function App() {
-  const params = new URLSearchParams(window.location.search);
-  const sceneParam = params.get("scene");
-  const segmentParam = params.get("segment");
-
-  if (sceneParam) {
-    const sceneIndex = parseInt(sceneParam, 10) - 1;
-    if (sceneIndex >= 0 && sceneIndex < SCENE_COMPONENTS.length) {
-      const segmentNum = segmentParam ? parseInt(segmentParam, 10) : undefined;
-      return <IsolatedScene index={sceneIndex} segment={segmentNum} />;
-    }
-  }
-
-  return <VideoTemplate />;
-}
-
-function IsolatedScene({ index, segment }: { index: number; segment?: number }) {
-  const SceneComponent = SCENE_COMPONENTS[index];
-  const sceneKeys = Object.keys(SCENE_DURATIONS);
-  const sceneNumber = index + 1;
-
-  let duration: number;
-  if (segment && SEGMENT_DURATIONS[sceneNumber]?.[segment]) {
-    duration = SEGMENT_DURATIONS[sceneNumber][segment];
-  } else {
-    duration = Object.values(SCENE_DURATIONS)[index];
-  }
-
-  const durationKey = segment ? `${sceneKeys[index]}_seg${segment}` : sceneKeys[index];
-
-  useVideoPlayer({
-    durations: { [durationKey]: duration },
-    loop: false,
-  });
-
-  // Only pass segment prop to components that support it
-  const sceneProps = segment && SEGMENT_DURATIONS[sceneNumber] ? { segment } : {};
-
-  return (
-    <div className="w-full h-screen overflow-hidden bg-black">
-      <SceneComponent {...sceneProps} />
-    </div>
-  );
-}
+    - id: section-partner-b
+      script: "Partner B does Y."
+      duration_hint_ms: 5000
+      slide_title: "Partner B"
+      ...
 ```
 
-### Scene Component with Segments
+Each segment gets its own voiceover clip, video clip, and branded slide.
 
-If your scene has internal sub-sections (carousel, tabs, sequential cards), add segment isolation:
+### Slide Tips
 
-```typescript
-interface MySceneProps {
-  segment?: number; // 1-based
-}
-
-export function MyScene({ segment }: MySceneProps) {
-  const items = [
-    { name: "Service A", image: imgA },
-    { name: "Service B", image: imgB },
-    { name: "Service C", image: imgC },
-  ];
-
-  const [activeIdx, setActiveIdx] = useState(segment ? segment - 1 : 0);
-
-  useEffect(() => {
-    if (segment) return; // Don't cycle when capturing a single segment
-    const interval = setInterval(() => {
-      setActiveIdx(prev => (prev + 1) % items.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [segment]);
-
-  return (
-    <div>
-      {items.map((item, idx) =>
-        activeIdx === idx && <Card key={idx} item={item} />
-      )}
-    </div>
-  );
-}
-```
-
-### VideoTemplate Pattern
-
-```typescript
-export const SCENE_DURATIONS = {
-  scene1: 5000,
-  scene2: 12000,  // Has 3 segments × 4s each
-  scene3: 4000,
-};
-
-export const SEGMENT_DURATIONS: Record<number, Record<number, number>> = {
-  2: { 1: 4000, 2: 4000, 3: 4000 },  // Scene2's 3 segments
-};
-
-export default function VideoTemplate() {
-  const { currentScene } = useVideoPlayer({
-    durations: SCENE_DURATIONS,
-  });
-
-  return (
-    <AnimatePresence mode="popLayout">
-      {currentScene === 0 && <Scene1 key="s1" />}
-      {currentScene === 1 && <Scene2 key="s2" />}
-      {currentScene === 2 && <Scene3 key="s3" />}
-    </AnimatePresence>
-  );
-}
-```
+- Set `slide_title` only on scenes where you want a branded card
+- Omit `slide_title` on opening hooks and closing scenes to let the video play through
+- Keep `slide_stat` short (under 40 characters)
+- `slide_tagline` appears smaller — use for the value proposition
+- Customize brand colors in `slides.style.background_gradient` and `stat_color`
+- Adjust `duration_offset_sec` if slides feel too long/short vs voiceover (-0.3 is a good default)
 
 ## Pipeline Steps
 
-The pipeline runs these steps in order. Each is idempotent and cached:
+The pipeline runs these steps in order. Each is cached — re-runs skip completed steps.
 
 ```
-research → enhance → tts → music → video → mix_audio → compose → verify
+research  → Optional deep research via Exa.ai (needs EXA_API_KEY)
+enhance   → Apply Claude-enhanced scripts (pre-generated, loaded from disk)
+tts       → Generate voiceover clips via ElevenLabs
+music     → Generate background music via Suno (or use local file)
+video     → Generate video clips (Veo, Runway, local file, or react-capture)
+slides    → Generate branded info-card slides + interleave with video
+mix_audio → Concatenate voiceovers with gaps, mix with music
+compose   → Mux final video + audio into output MP4
 ```
 
-| Step | What it does | Can skip? |
-|------|-------------|-----------|
-| **research** | Exa.ai deep search for scene context | Yes (no `EXA_API_KEY`) |
-| **enhance** | Loads pre-generated enhanced scripts from `enhanced-scripts.json` | Yes (uses originals) |
-| **tts** | ElevenLabs voiceover via Kie.ai | No |
-| **music** | Suno background music via Kie.ai | No |
-| **video** | Visual source (AI, local, or react-capture) | No |
-| **mix_audio** | Combines TTS + music at configured dB levels | No |
-| **compose** | Muxes video + mixed audio into final MP4 | No |
-| **verify** | Output validation | Not yet implemented |
-
-### Running Individual Steps
+### Useful Commands
 
 ```bash
-npx tsx src/cli.ts research projects/my-project.yaml
-npx tsx src/cli.ts tts projects/my-project.yaml
-npx tsx src/cli.ts video projects/my-project.yaml
-npx tsx src/cli.ts capture projects/my-project.yaml    # react-capture only
-npx tsx src/cli.ts status projects/my-project.yaml      # Check progress
-npx tsx src/cli.ts resume projects/my-project.yaml      # Resume from last step
+cd pipeline
+
+# Full pipeline
+npx tsx src/cli.ts render projects/my-client.yaml
+
+# Check progress
+npx tsx src/cli.ts status projects/my-client.yaml
+
+# Resume from where it stopped
+npx tsx src/cli.ts resume projects/my-client.yaml
+
+# Force re-run everything
+npx tsx src/cli.ts render projects/my-client.yaml --force
+
+# Dry run (validate config only)
+npx tsx src/cli.ts render projects/my-client.yaml --dry-run
 ```
 
-### Re-running a Step
+### Re-running Individual Steps
 
-```bash
-npx tsx src/cli.ts tts projects/my-project.yaml --force  # Re-generate all TTS
+To re-run a specific step (e.g., regenerate slides after changing content):
+
+1. Edit `output/{slug}/.pipeline-state.json`
+2. Set the step's `status` to `"pending"` (and any downstream steps too)
+3. Run `npx tsx src/cli.ts resume projects/{slug}.yaml`
+
+Common re-run patterns:
+- Changed slide content → reset `slides` + `compose`
+- Changed scripts → reset `tts` + `slides` + `mix_audio` + `compose`
+- Changed music style → reset `music` + `mix_audio` + `compose`
+- Changed video prompts → reset `video` + `slides` + `compose`
+
+## Voice Options
+
+ElevenLabs voices available via Kie.ai:
+
+| Voice ID | Style |
+|----------|-------|
+| Daniel | British male, professional, warm |
+| Rachel | American female, clear, conversational |
+| Adam | American male, deep, authoritative |
+| Emily | British female, friendly, energetic |
+| Sam | American male, casual, young |
+
+Adjust `settings.speed` (0.7-1.2) and `settings.stability` (0-1) to fine-tune delivery.
+
+## Music Options
+
+### AI-generated (Suno)
+
+```yaml
+music:
+  provider: suno
+  mode: instrumental
+  style: "Corporate upbeat inspirational"    # Be descriptive
+  negative_tags: "Heavy Metal, Aggressive"   # What to avoid
 ```
 
-For react-capture, you can selectively re-record by deleting individual clip files:
+### Local file
 
-```bash
-rm my-project-output/video/clips/scene2b-development.mp4
-npx tsx src/cli.ts capture projects/my-project.yaml      # Only re-captures scene2b
+```yaml
+music:
+  provider: local
+  local_file: "../../assets/client-name/background.mp3"
 ```
 
-## Enhancement Workflow
+## Outputs Produced
 
-Enhanced scripts are NOT generated by the pipeline — they are created in a Claude session:
+| File | Location | Description |
+|------|----------|-------------|
+| Final video | `output/{slug}/{slug}.mp4` | Complete video with voiceover, music, visuals, slides |
+| Voiceover clips | `output/{slug}/audio/voiceover/*.mp3` | Individual per-scene narration |
+| Mixed audio | `output/{slug}/audio/mixed/final-mix.mp3` | Full voiceover + music track |
+| Music | `output/{slug}/audio/music/background.mp3` | AI-generated background music |
+| Video clips | `output/{slug}/video/clips/*.mp4` | Per-scene AI video clips |
+| Combined video | `output/{slug}/video/raw/combined.mp4` | All clips interleaved (no audio) |
+| Slide images | `output/{slug}/slides/images/*.png` | Branded info-card PNGs |
+| Slide clips | `output/{slug}/slides/clips/*.mp4` | Ken Burns animated slide videos |
+| Research | `output/{slug}/research/*.json` | Exa.ai research results (if enabled) |
+| Enhanced scripts | `output/{slug}/enhanced/*.json` | Claude-improved voiceover scripts |
+| Pipeline state | `output/{slug}/.pipeline-state.json` | Step completion tracking |
 
-1. Run research: `npx tsx src/cli.ts research projects/my-project.yaml`
-2. Open the research report: `my-project-output/research/research-report.json`
-3. Ask Claude to enhance your scripts using the research findings
-4. Claude writes `my-project-output/enhanced/enhanced-scripts.json`
-5. Resume pipeline: `npx tsx src/cli.ts resume projects/my-project.yaml`
+All per-scene files use the scene/segment `id` as filename, making them easy to identify and selectively regenerate.
 
-The enhance step loads the pre-generated file — it does not call any LLM API.
+## Environment Setup
 
-## Environment Variables
-
-```bash
-# Required for TTS, music, and AI video generation
-KIE_API_KEY=your_kie_api_key
-
-# Optional for research step
-EXA_API_KEY=your_exa_api_key
+Required in `.env` (project root):
+```
+KIE_API_KEY=your_kie_api_key           # Required: TTS, music, video generation
+EXA_API_KEY=your_exa_api_key           # Optional: deep research step
 ```
 
-Place in `.env` at project root or pipeline directory.
+Required on system:
+- Node.js 18+
+- FFmpeg 7+ on PATH
 
-## Checklist for a New Project
+## Checklist for New Projects
 
-- [ ] Create YAML config under `pipeline/projects/`
-- [ ] Define scenes (with segments if needed)
-- [ ] Set voice provider and voice ID
-- [ ] Set music prompt and mode
-- [ ] Choose visual source and configure it
-- [ ] Set output directory and resolution
-- [ ] Add source images to an assets directory (if using `image-to-video`)
-- [ ] Build React client app (if using `react-capture`)
-  - [ ] Create scene components
-  - [ ] Add `?scene=N&segment=M` URL param support
-  - [ ] Export `SCENE_DURATIONS` and `SEGMENT_DURATIONS`
-  - [ ] Verify isolated scene rendering in browser
-- [ ] Add `KIE_API_KEY` to `.env`
-- [ ] Run `--dry-run` to validate config
-- [ ] Run full pipeline
+- [ ] Copy `_template.yaml` → `pipeline/projects/{slug}.yaml`
+- [ ] Set unique `project.slug` (determines output directory)
+- [ ] Create `assets/{client}/` and add client images (if any)
+- [ ] Write scene scripts (voiceover text)
+- [ ] Add video prompts (for AI video generation)
+- [ ] Add slide content (title, stat, tagline per scene)
+- [ ] Customize brand colors in `slides.style` (gradient, accent color)
+- [ ] Choose voice (`voice.voice_id`)
+- [ ] Set music style (`music.style`)
+- [ ] Dry run to validate: `npx tsx src/cli.ts render projects/{slug}.yaml --dry-run`
+- [ ] Full run: `npx tsx src/cli.ts render projects/{slug}.yaml`
+- [ ] Review output at `output/{slug}/{slug}.mp4`
