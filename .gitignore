@@ -3,3 +3,10 @@ dist
 .DS_Store
 vite.config.ts.*
 *.tar.gz
+
+# Pipeline outputs
+.env
+/video/
+audio/
+pipeline/node_modules
+.pipeline-state.json

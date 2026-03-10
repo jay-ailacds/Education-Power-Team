@@ -10,14 +10,21 @@ import rootSquareImage from '@assets/root_square_students.png';
 const operations = [
   { name: 'A.K. Solutions', desc: 'ERP & Automation', img: tallyImage, color: 'border-blue-500' },
   { name: 'Root Square LLP', desc: 'Uniforms & Stationery', img: rootSquareImage, color: 'border-green-500' },
-  { name: 'AI-LAC-DS', desc: 'AI Learning Programs', img: aiImage, color: 'border-purple-500' },
+  { name: 'AI-LA-CDS', desc: 'AI Learning Programs', img: aiImage, color: 'border-purple-500' },
   { name: 'Asperia Institute', desc: 'Medical Skill Training', img: medicalImage, color: 'border-red-500' },
 ];
 
-export function Scene6() {
-  const [step, setStep] = useState(0);
+interface Scene6Props {
+  segment?: number; // 1-based: 1=AK Solutions, 2=Root Square, 3=AI-LA-CDS, 4=Asperia
+}
+
+export function Scene6({ segment }: Scene6Props) {
+  const [step, setStep] = useState(segment ? segment : 0);
 
   useEffect(() => {
+    // If rendering a single segment, don't advance
+    if (segment) return;
+
     const timers = [
       setTimeout(() => setStep(1), 500),
       setTimeout(() => setStep(2), 3500),
@@ -25,7 +32,7 @@ export function Scene6() {
       setTimeout(() => setStep(4), 10500),
     ];
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [segment]);
 
   return (
     <motion.div

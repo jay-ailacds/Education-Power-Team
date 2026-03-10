@@ -14,16 +14,23 @@ const services = [
   { name: 'Athletos Foundation', desc: 'Structured Sports', image: sportsImage },
 ];
 
-export function Scene5() {
-  const [activeIdx, setActiveIdx] = useState(0);
+interface Scene5Props {
+  segment?: number; // 1-based: 1=Vardhman, 2=MegaByte, 3=AcePower, 4=Athletos
+}
+
+export function Scene5({ segment }: Scene5Props) {
+  const [activeIdx, setActiveIdx] = useState(segment ? segment - 1 : 0);
 
   useEffect(() => {
+    // If rendering a single segment, don't cycle
+    if (segment) return;
+
     const interval = setInterval(() => {
       setActiveIdx(prev => (prev < 3 ? prev + 1 : 0));
-    }, 4000); // Wait 4s per service
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [segment]);
 
   return (
     <motion.div

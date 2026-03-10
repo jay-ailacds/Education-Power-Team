@@ -5,7 +5,7 @@ import {
   Scene5, Scene6, Scene7, Scene8 
 } from './video_scenes';
 
-const SCENE_DURATIONS = {
+export const SCENE_DURATIONS = {
   scene1: 3000,
   scene2: 7000,
   scene3: 6000,
@@ -14,6 +14,14 @@ const SCENE_DURATIONS = {
   scene6: 14000, // 4 operations
   scene7: 4000,
   scene8: 4000,
+};
+
+// Per-segment durations for isolated capture
+// Scene5: carousel cycles 4 services × 4.5s each = 18s total
+// Scene6: 4 operations appearing sequentially over 14s
+export const SEGMENT_DURATIONS: Record<number, Record<number, number>> = {
+  5: { 1: 4500, 2: 4500, 3: 4500, 4: 4500 },
+  6: { 1: 3500, 2: 3500, 3: 3500, 4: 3500 },
 };
 
 export default function VideoTemplate() {
