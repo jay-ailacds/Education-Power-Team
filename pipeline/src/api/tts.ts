@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { KieClient } from "./kie-client.ts";
 import { ffprobe } from "../media/ffmpeg.ts";
@@ -36,8 +36,22 @@ export async function generateVoiceovers(
   const jobs = flattenScenes(scenes);
   logger.step("TTS", `Generating ${jobs.length} voiceover clips via ElevenLabs`);
 
-  // Launch all TTS tasks in parallel
+  // Launch all TTS tasks in parallel (skip cached files)
   const taskPromises = jobs.map(async (job) => {
+    const outputFile = join(voDir, `${job.sceneId}.mp3`);
+
+    // Per-file cache: skip if MP3 already exists
+    if (existsSync(outputFile)) {
+      try {
+        const probe = await ffprobe(outputFile);
+        const durationMs = Math.round(probe.duration * 1000);
+        logger.info(`  Cached: ${job.sceneId} (${durationMs}ms)`);
+        return { sceneId: job.sceneId, file: outputFile, duration_ms: durationMs };
+      } catch {
+        // Corrupt file, regenerate
+      }
+    }
+
     logger.info(`  Submitting TTS: ${job.sceneId}`);
 
     const taskId = await client.createTask({
@@ -74,7 +88,6 @@ export async function generateVoiceovers(
     }
 
     // Download audio file
-    const outputFile = join(voDir, `${job.sceneId}.mp3`);
     await client.downloadFile(audioUrl, outputFile);
 
     // Probe duration
