@@ -209,9 +209,9 @@ scenes:
           data, automated reports generating. Clean office environment.
 
       - id: scene6b-rootsquare
-        script: "Root Square LLP manages uniforms and stationery supply systems."
+        script: "Roott Square Stationery and Uniforms LLP manages uniforms and stationery supply systems."
         duration_hint_ms: 3500
-        slide_title: "Root Square LLP"
+        slide_title: "Roott Square Stationery and Uniforms LLP"
         slide_stat: "Equipped from day one"
         slide_tagline: "Uniforms & stationery supply"
         image: "../../assets/root_square_supplies.png"

@@ -155,14 +155,16 @@ export function calculateSlideDurations(
     const isLast = i === ttsResults.length - 1;
     const sceneTotalSec = (tts.duration_ms / 1000) + (isLast ? 0 : gapSec);
     const rawSlideDuration = sceneTotalSec - (clip.duration_ms / 1000);
-    const slideDurationSec = Math.max(0, rawSlideDuration + durationOffsetSec);
+    const rawAdjusted = Math.max(0, rawSlideDuration + durationOffsetSec);
+    // Clamp to minimum: if a slide is shown at all, give it enough time to be readable
+    const slideDurationSec = rawAdjusted > 0 ? Math.max(rawAdjusted, minSlideDurationSec) : 0;
 
     entries.push({
       sceneId: tts.sceneId,
       slideDurationSec,
       veoClipDurationMs: clip.duration_ms,
       ttsDurationMs: tts.duration_ms,
-      titleOnly: slideDurationSec > 0 && slideDurationSec < minSlideDurationSec,
+      titleOnly: false,
     });
   }
 
